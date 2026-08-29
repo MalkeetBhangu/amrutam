@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "amrutam",
+    "slug": "amrutam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/Splash.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/Splash.png",
+        "backgroundColor": "#1C4332"
+      },
+      "package": "com.gamptax.amrutam"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#21533B",
+          "image": "./assets/images/Splash.png",
+          "dark": {
+            "image": "./assets/images/Splash.png",
+            "backgroundColor": "#21533B"
+          },
+          "imageWidth": 250
+        }
+      ]
+    ]
+  }
+}
