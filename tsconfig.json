@@ -1,0 +1,33 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": [
+        "src/*"
+      ],
+      "src/*": [
+        "src/*"
+      ],
+      "@assets/*": [
+        "assets/*"
+      ],
+      "assets/*": [
+        "assets/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "assets/**/*",
+    "declarations.d.ts",
+    "**/*.d.ts",
+    "App.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "expo-env.d.ts"
+  ]
+}
