@@ -1,0 +1,53 @@
+{
+    "translation": {
+        "tabs": {
+            "home": "Home",
+            "doctors": "Doctors",
+            "shop": "Shop",
+            "records": "Records",
+            "profile": "Profile"
+        },
+        "doctors": {
+            "logoText": "Amrutam",
+            "findDoctorTitle": "Find your Ayurvedic doctor",
+            "findDoctorSubtitle": "Expert consultations tailored to your unique dosha.",
+            "searchPlaceholder": "Search by name or specialty",
+            "categories": {
+                "all": "All",
+                "skin": "Skin",
+                "digestive": "Digestive",
+                "women": "Women",
+                "hair": "Hair",
+                "mentalHealth": "Mental Health"
+            },
+            "card": {
+                "consultation": "Consultation",
+                "nextSlot": "Next Slot",
+                "bookSlot": "Book slot",
+                "yearsExp": "Years Exp.",
+                "today": "Today"
+            },
+            "filterModal": {
+                "title": "Filters",
+                "clearAll": "Clear All",
+                "expertise": "Expertise",
+                "language": "Language",
+                "gender": "Gender",
+                "consultationFee": "Consultation Fee",
+                "free": "Free",
+                "apply": "Apply"
+            },
+            "noResults": {
+                "title": "No Doctors Found",
+                "subtitle": "We couldn't find any doctors matching your current filters. Try adjusting your search or clearing filters to see more results.",
+                "clearAllFilters": "Clear All Filters",
+                "goBack": "Go Back"
+            }
+        },
+        "common": {
+            "appName": "Amrutam",
+            "comingSoon": "Coming Soon 🚀",
+            "comingSoonSubtitle": "We are working hard to bring this feature to you soon!"
+        }
+    }
+}
