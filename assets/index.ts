@@ -14,3 +14,13 @@ export { default as verified } from './images/VerifiedIcon.svg'
 export { default as cross } from './images/Cross.svg'
 export { default as filterClearIcon } from './images/FilterClearIcon.svg'
 export { default as noDoctor } from './images/NoDoctor.svg'
+export { default as backArrow } from './images/BackArrow.svg'
+export { default as heartIcon } from './images/HeartIcon.svg'
+export { default as clockIcon } from './images/ClockIcon.svg'
+export { default as chevronDown } from './images/ChevronDown.svg'
+export { default as sunIcon } from './images/SunIcon.svg'
+export { default as arrowRight } from './images/ArrowRight.svg'
+export { default as calender } from './images/Calender.svg'
+export { default as meet } from './images/Meet.svg'
+
+
