@@ -1,19 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { StyleSheet, View, Image, Pressable, Dimensions } from 'react-native'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
 import { getHeight } from 'src/libs/StyleHelper'
-import { star as StarIcon, heartIcon as HeartIcon, heartFilled as HeartFilledIcon, plus as PlusIcon, bag as BagIcon } from 'assets'
-import { ProductItem } from 'src/types/ProductTypes'
+import { star as StarIcon, heartFilled as HeartFilledIcon, plus as PlusIcon, bag as BagIcon } from 'assets'
+import { WishlistItem } from 'src/types/WishlistTypes'
 
-export interface ProductCardProps {
-    product: ProductItem
+export interface WishlistCardProps {
+    item: WishlistItem
     isInCart?: boolean
-    isWishlisted?: boolean
-    onAddToCart?: (product: ProductItem) => void
-    onToggleWishlist?: (product: ProductItem, newWishlistState: boolean) => void
+    onRemoveFromWishlist?: (item: WishlistItem) => void
+    onAddToCart?: (item: WishlistItem) => void
     onOpenCart?: () => void
-    onPress?: (product: ProductItem) => void
+    onPress?: (item: WishlistItem) => void
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
@@ -26,44 +25,35 @@ const DEFAULT_PRODUCT_IMAGES = [
     'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=500',
 ]
 
-const ProductCard: React.FC<ProductCardProps> = ({
-    product,
+const WishlistCard: React.FC<WishlistCardProps> = ({
+    item,
     isInCart = false,
-    isWishlisted: propIsWishlisted,
+    onRemoveFromWishlist,
     onAddToCart,
-    onToggleWishlist,
     onOpenCart,
     onPress,
 }) => {
-    const [isWishlisted, setIsWishlisted] = useState(Boolean(propIsWishlisted ?? product.isWishlisted))
     const [imgError, setImgError] = useState(false)
 
-    useEffect(() => {
-        setIsWishlisted(Boolean(propIsWishlisted ?? product.isWishlisted))
-    }, [propIsWishlisted, product.isWishlisted])
-
-    const handleWishlistToggle = useCallback(() => {
-        const nextState = !isWishlisted
-        setIsWishlisted(nextState)
-        if (onToggleWishlist) {
-            onToggleWishlist(product, nextState)
-        }
-    }, [isWishlisted, onToggleWishlist, product])
+    const handleRemovePress = useCallback(() => {
+        if (onRemoveFromWishlist) onRemoveFromWishlist(item)
+    }, [onRemoveFromWishlist, item])
 
     const handleCardPress = useCallback(() => {
-        if (onPress) onPress(product)
-    }, [onPress, product])
+        if (onPress) onPress(item)
+    }, [onPress, item])
 
     const handleAddPress = useCallback(() => {
         if (isInCart) {
             if (onOpenCart) onOpenCart()
         } else {
-            if (onAddToCart) onAddToCart(product)
+            if (onAddToCart) onAddToCart(item)
         }
-    }, [isInCart, onOpenCart, onAddToCart, product])
+    }, [isInCart, onOpenCart, onAddToCart, item])
 
+    const itemKey = item.id || (item as any).productId || '1'
     const fallbackUri = DEFAULT_PRODUCT_IMAGES[
-        Math.abs(product.id?.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || 0) % DEFAULT_PRODUCT_IMAGES.length
+        Math.abs(itemKey.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) || 0) % DEFAULT_PRODUCT_IMAGES.length
     ]
 
     const resolveImageUrl = (urlStr?: string | null): string => {
@@ -73,7 +63,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         const trimmed = urlStr.trim()
 
-        // Filter out dummy non-loading URLs like example.com or via.placeholder.com
         if (
             trimmed.includes('example.com') ||
             trimmed.includes('via.placeholder.com') ||
@@ -83,7 +72,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
             return fallbackUri
         }
 
-        // Rewrite localhost / 127.0.0.1 for Android devices
         if (trimmed.includes('localhost') || trimmed.includes('127.0.0.1')) {
             const baseUrl = process.env.EXPO_PUBLIC_BASE_URL || ''
             const match = baseUrl.match(/^https?:\/\/[^\/]+/)
@@ -94,11 +82,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
         return trimmed
     }
 
-    const resolvedUri = resolveImageUrl(product.image)
+    const resolvedUri = resolveImageUrl(item.image)
     const imageSource = !imgError ? { uri: resolvedUri } : { uri: fallbackUri }
-
-    const ratingVal = product.rating != null ? Number(product.rating).toFixed(1) : '4.8'
-    const subtitleText = product.subtitle || product.category || 'Ayurvedic Care'
+    const ratingVal = item.rating != null ? Number(item.rating).toFixed(1) : '4.8'
+    const subtitleText = item.subtitle || item.category || 'Ayurvedic Care'
 
     return (
         <Pressable style={styles.cardContainer} onPress={handleCardPress}>
@@ -111,32 +98,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     onError={() => setImgError(true)}
                 />
 
-                {/* Badge if available (e.g. BESTSELLER) */}
-                {Boolean(product.badge) && (
-                    <View style={styles.badgeContainer}>
-                        <TextView text={product.badge?.toUpperCase() || ''} style={styles.badgeText} />
-                    </View>
-                )}
-
-                {/* Wishlist Heart Icon Button */}
-                <Pressable
-                    style={[styles.heartButton, isWishlisted && styles.heartButtonActive]}
-                    onPress={handleWishlistToggle}
-                    hitSlop={8}
-                >
-                    {isWishlisted ? (
-                        <HeartFilledIcon
-                            width={getHeight(18)}
-                            height={getHeight(18)}
-                            color="#C62828"
-                        />
-                    ) : (
-                        <HeartIcon
-                            width={getHeight(18)}
-                            height={getHeight(18)}
-                            color="#101828"
-                        />
-                    )}
+                {/* Filled Red Heart Icon Button */}
+                <Pressable style={styles.heartButton} onPress={handleRemovePress} hitSlop={8}>
+                    <HeartFilledIcon
+                        width={getHeight(18)}
+                        height={getHeight(18)}
+                        color="#C62828"
+                    />
                 </Pressable>
             </View>
 
@@ -149,14 +117,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 </View>
 
                 {/* Product Name */}
-                <TextView text={product.name} style={styles.productName} numberOfLines={2} />
+                <TextView text={item.name} style={styles.productName} numberOfLines={2} />
 
                 {/* Subtitle / Category */}
                 <TextView text={subtitleText} style={styles.subtitleText} numberOfLines={1} />
 
-                {/* Price & Add to Cart Action Row */}
+                {/* Price & Action Row */}
                 <View style={styles.bottomRow}>
-                    <TextView text={`₹${product.price}`} style={styles.priceText} />
+                    <TextView text={`₹${item.price}`} style={styles.priceText} />
 
                     <Pressable
                         style={[styles.addButton, isInCart && styles.inCartButton]}
@@ -166,7 +134,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                         {isInCart ? (
                             <BagIcon width={getHeight(14)} height={getHeight(14)} color={colors.white} />
                         ) : (
-                            <PlusIcon width={getHeight(14)} height={getHeight(14)} color={colors.white} />
+                            <PlusIcon width={getHeight(14)} height={getHeight(14)} color={colors.darkGreen} />
                         )}
                     </Pressable>
                 </View>
@@ -200,21 +168,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-    badgeContainer: {
-        position: 'absolute',
-        top: 10,
-        left: 10,
-        backgroundColor: '#5A6559',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: getHeight(6),
-    },
-    badgeText: {
-        fontSize: getHeight(9),
-        fontWeight: '700',
-        color: colors.white,
-        letterSpacing: 0.5,
-    },
     heartButton: {
         position: 'absolute',
         top: 10,
@@ -230,9 +183,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 4,
-    },
-    heartButtonActive: {
-        backgroundColor: '#FFFDF9',
     },
     detailsContainer: {
         padding: 12,
@@ -258,7 +208,12 @@ const styles = StyleSheet.create({
     subtitleText: {
         fontSize: getHeight(12),
         color: colors.textSecondary,
-        marginBottom: 10,
+        marginBottom: 8,
+    },
+    priceText: {
+        fontSize: getHeight(16),
+        fontWeight: '700',
+        color: colors.darkGreen,
     },
     bottomRow: {
         flexDirection: 'row',
@@ -266,16 +221,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 4,
     },
-    priceText: {
-        fontSize: getHeight(16),
-        fontWeight: '700',
-        color: colors.darkGreen,
-    },
     addButton: {
         width: getHeight(32),
         height: getHeight(32),
         borderRadius: getHeight(16),
-        backgroundColor: colors.darkGreen,
+        backgroundColor: '#E8F3EE',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -284,4 +234,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default React.memo(ProductCard)
+export default React.memo(WishlistCard)

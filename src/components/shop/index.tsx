@@ -8,6 +8,9 @@ import ShopCartFloatingButton from './ShopCartFloatingButton'
 import useGetProducts from '@src/apis/useGetProducts'
 import useAddToCart from '@src/apis/useAddToCart'
 import useGetCart from '@src/apis/useGetCart'
+import useGetWishlist from '@src/apis/useGetWishlist'
+import useAddToWishlist from '@src/apis/useAddToWishlist'
+import useRemoveFromWishlist from '@src/apis/useRemoveFromWishlist'
 import { ProductItem } from 'src/types/ProductTypes'
 import TextView from 'src/components/sharedComponents/TextView'
 import { getHeight } from 'src/libs/StyleHelper'
@@ -24,6 +27,9 @@ const Shop: React.FC = () => {
 
     const { mutate: addToCartMutate } = useAddToCart()
     const { data: cartData } = useGetCart('guest')
+    const { data: wishlistData } = useGetWishlist('guest')
+    const { mutate: addToWishlistMutate } = useAddToWishlist()
+    const { mutate: removeFromWishlistMutate } = useRemoveFromWishlist()
 
     const cartProductIds = useMemo(() => {
         const raw: any = cartData
@@ -35,6 +41,17 @@ const Shop: React.FC = () => {
 
         return new Set(items.map((i: any) => i.productId || i.id))
     }, [cartData])
+
+    const wishlistProductIds = useMemo(() => {
+        const raw: any = wishlistData
+        let items: any[] = []
+        if (Array.isArray(raw?.data?.items)) items = raw.data.items
+        else if (Array.isArray(raw?.data)) items = raw.data
+        else if (Array.isArray(raw?.items)) items = raw.items
+        else if (Array.isArray(raw)) items = raw
+
+        return new Set(items.map((i: any) => i.productId || i.id))
+    }, [wishlistData])
 
     const cartCount = useMemo(() => {
         const raw: any = cartData
@@ -82,6 +99,19 @@ const Shop: React.FC = () => {
         [addToCartMutate]
     )
 
+    const handleToggleWishlist = useCallback(
+        (product: ProductItem, newWishlistState: boolean) => {
+            if (newWishlistState) {
+                console.log('Adding product to wishlist via API:', product.id)
+                addToWishlistMutate({ userId: 'guest', productId: product.id })
+            } else {
+                console.log('Removing product from wishlist via API:', product.id)
+                removeFromWishlistMutate({ userId: 'guest', productId: product.id })
+            }
+        },
+        [addToWishlistMutate, removeFromWishlistMutate]
+    )
+
     const handleLoadMore = useCallback(() => {
         if (hasNextPage && !isFetchingNextPage) {
             fetchNextPage()
@@ -103,16 +133,19 @@ const Shop: React.FC = () => {
     const renderProductItem = useCallback(
         ({ item }: { item: ProductItem }) => {
             const isInCart = cartProductIds.has(item.id)
+            const isWishlisted = wishlistProductIds.has(item.id)
             return (
                 <ProductCard
                     product={item}
                     isInCart={isInCart}
+                    isWishlisted={isWishlisted}
                     onAddToCart={handleAddToCart}
+                    onToggleWishlist={handleToggleWishlist}
                     onOpenCart={handleCartPress}
                 />
             )
         },
-        [cartProductIds, handleAddToCart, handleCartPress]
+        [cartProductIds, wishlistProductIds, handleAddToCart, handleToggleWishlist, handleCartPress]
     )
 
     const renderSkeletonItem = useCallback(() => <ProductCardSkeleton />, [])

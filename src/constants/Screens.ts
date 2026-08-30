@@ -6,6 +6,7 @@ export enum Screens {
     SHOP = 'SHOP',
     RECORDS = 'RECORDS',
     PROFILE = 'PROFILE',
+    WISHLIST = 'WISHLIST',
     DOCTOR_DETAILS = 'DOCTOR_DETAILS',
     BOOKINGS = 'BOOKINGS',
     CART = 'CART'
@@ -16,5 +17,5 @@ export enum TABS {
     DOCTORS_TAB = 'DOCTORS_TAB',
     SHOP_TAB = 'SHOP_TAB',
     RECORDS_TAB = 'RECORDS_TAB',
-    PROFILE_TAB = 'PROFILE_TAB',
+    WISHLIST_TAB = 'WISHLIST_TAB',
 }

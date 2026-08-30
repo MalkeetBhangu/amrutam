@@ -4,5 +4,6 @@ export enum QUERY_KEYS {
     BOOK_SLOTS = 'BOOK_SLOTS',
     BOOKINGS = 'BOOKINGS',
     PRODUCTS = 'PRODUCTS',
-    CART = 'CART'
+    CART = 'CART',
+    WISHLIST = 'WISHLIST'
 }

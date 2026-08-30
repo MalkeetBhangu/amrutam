@@ -6,7 +6,7 @@ import Cart from '@src/components/cart'
 import DoctorDetails from '@src/components/doctorDetails'
 import Doctors from '@src/components/doctors'
 import Home from '@src/components/home'
-import Profile from '@src/components/profile'
+import Wishlist from '@src/components/wishlist'
 import Records from '@src/components/records'
 import Shop from '@src/components/shop'
 import { getHeight } from '@src/libs/StyleHelper'
@@ -55,10 +55,12 @@ const RecordsNavigator = () => {
     )
 }
 
-const ProfileNavigator = () => {
+const WishListNavigator = () => {
     return (
-        <Stack.Navigator initialRouteName={Screens.PROFILE} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={Screens.PROFILE} component={Profile} />
+        <Stack.Navigator initialRouteName={Screens.WISHLIST} screenOptions={{ headerShown: false }}>
+            <Stack.Screen name={Screens.WISHLIST} component={Wishlist} />
+            <Stack.Screen name={Screens.CART} component={Cart} />
+
         </Stack.Navigator>
     )
 }
@@ -71,7 +73,7 @@ const TabNavigator = () => {
         { tabIcon: doctors, name: TABS.DOCTORS_TAB, screen: DoctorsNavigator, label: t.tabs.doctors },
         { tabIcon: shop, name: TABS.SHOP_TAB, screen: ShopNavigator, label: t.tabs.shop },
         { tabIcon: records, name: TABS.RECORDS_TAB, screen: RecordsNavigator, label: t.tabs.records },
-        { tabIcon: profile, name: TABS.PROFILE_TAB, screen: ProfileNavigator, label: t.tabs.profile }
+        { tabIcon: profile, name: TABS.WISHLIST_TAB, screen: WishListNavigator, label: t.tabs.wishlist }
     ]
 
     return (
