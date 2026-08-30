@@ -7,7 +7,8 @@ export enum Screens {
     RECORDS = 'RECORDS',
     PROFILE = 'PROFILE',
     DOCTOR_DETAILS = 'DOCTOR_DETAILS',
-    BOOKINGS = 'BOOKINGS'
+    BOOKINGS = 'BOOKINGS',
+    CART = 'CART'
 }
 
 export enum TABS {
