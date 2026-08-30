@@ -83,6 +83,21 @@
             "exploreShop": "Explore Shop",
             "moveAllToCart": "Move All to Cart"
         },
+        "shop": {
+            "filterModal": {
+                "title": "Filters",
+                "clearAll": "Clear All",
+                "sortBy": "Sort By",
+                "popularity": "Popularity",
+                "priceLowToHigh": "Price: Low to High",
+                "priceHighToLow": "Price: High to Low",
+                "rating": "Rating",
+                "categories": "Categories",
+                "searchCategories": "Search category by name...",
+                "priceRange": "Price Range",
+                "applyFilters": "Apply Filters"
+            }
+        },
         "common": {
             "appName": "Amrutam",
             "comingSoon": "Coming Soon 🚀",

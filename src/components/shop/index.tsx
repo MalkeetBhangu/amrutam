@@ -17,13 +17,23 @@ import { getHeight } from 'src/libs/StyleHelper'
 import { Screens } from 'src/constants/Screens'
 
 import ProductCardSkeleton from './ProductCardSkeleton'
+import ProductFilterModal, { FilterState } from './ProductFilterModal'
 
 const SKELETON_ARRAY = [1, 2, 3, 4, 5, 6]
+
+const DEFAULT_APPLIED_FILTERS: FilterState = {
+    sortBy: 'popularity',
+    categories: [],
+    minPrice: 0,
+    maxPrice: 5000,
+}
 
 const Shop: React.FC = () => {
     const navigation = useNavigation<any>()
     const [searchQuery, setSearchQuery] = useState('')
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+    const [appliedFilters, setAppliedFilters] = useState<FilterState>(DEFAULT_APPLIED_FILTERS)
 
     const { mutate: addToCartMutate } = useAddToCart()
     const { data: cartData } = useGetCart('guest')
@@ -85,6 +95,10 @@ const Shop: React.FC = () => {
         refetch,
     } = useGetProducts({
         search: debouncedSearchQuery,
+        sortBy: appliedFilters.sortBy,
+        categories: appliedFilters.categories,
+        minPrice: appliedFilters.minPrice,
+        maxPrice: appliedFilters.maxPrice,
     })
 
     const handleAddToCart = useCallback(
@@ -118,17 +132,17 @@ const Shop: React.FC = () => {
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-    const renderHeader = useCallback(
-        () => (
-            <View>
-                <ShopHeader
-                    searchQuery={searchQuery}
-                    onChangeSearchQuery={setSearchQuery}
-                />
-            </View>
-        ),
-        [searchQuery]
-    )
+    const handleOpenFilter = useCallback(() => {
+        setIsFilterModalOpen(true)
+    }, [])
+
+    const handleCloseFilter = useCallback(() => {
+        setIsFilterModalOpen(false)
+    }, [])
+
+    const handleApplyFilters = useCallback((filters: FilterState) => {
+        setAppliedFilters(filters)
+    }, [])
 
     const renderProductItem = useCallback(
         ({ item }: { item: ProductItem }) => {
@@ -170,9 +184,58 @@ const Shop: React.FC = () => {
         return null
     }, [isFetchingNextPage])
 
-    if (isLoading) {
-        return (
-            <View style={styles.container}>
+    const [allCategoryOptions, setAllCategoryOptions] = useState<string[]>([])
+
+    useEffect(() => {
+        if (products && products.length > 0) {
+            setAllCategoryOptions((prev) => {
+                const set = new Set(prev)
+                products.forEach((p: any) => {
+                    if (p?.category && typeof p.category === 'string' && p.category.trim()) {
+                        set.add(p.category.trim())
+                    }
+                    if (Array.isArray(p?.categories)) {
+                        p.categories.forEach((cat: string) => {
+                            if (cat && typeof cat === 'string' && cat.trim()) set.add(cat.trim())
+                        })
+                    }
+                    if (Array.isArray(p?.tags)) {
+                        p.tags.forEach((tag: string) => {
+                            if (tag && typeof tag === 'string' && tag.trim()) set.add(tag.trim())
+                        })
+                    }
+                })
+                return Array.from(set)
+            })
+        }
+    }, [products])
+
+    const dynamicCategories = useMemo(() => {
+        if (allCategoryOptions.length > 0) return allCategoryOptions
+        const catSet = new Set<string>()
+        products.forEach((p) => {
+            if (p.category && p.category.trim()) {
+                catSet.add(p.category.trim())
+            }
+        })
+        const list = Array.from(catSet)
+        return list.length > 0
+            ? list
+            : ['Hair Care', 'Skin Care', 'Immunity', 'Digestion', 'Wellness', 'Ayurvedic Oils', 'Malts & Powders', 'Personal Care', 'Juices & Syrups', 'Bundles & Kits']
+    }, [allCategoryOptions, products])
+
+    const isInitialLoading = isLoading && products.length === 0
+
+    return (
+        <View style={styles.container}>
+            {/* Top Fixed Shop Header - Never unmounts on search or filter updates */}
+            <ShopHeader
+                searchQuery={searchQuery}
+                onChangeSearchQuery={setSearchQuery}
+                onOpenFilter={handleOpenFilter}
+            />
+
+            {isInitialLoading ? (
                 <FlatList
                     data={SKELETON_ARRAY}
                     renderItem={renderSkeletonItem}
@@ -180,35 +243,37 @@ const Shop: React.FC = () => {
                     numColumns={2}
                     columnWrapperStyle={styles.columnWrapper}
                     contentContainerStyle={styles.listContent}
-                    ListHeaderComponent={renderHeader}
                     showsVerticalScrollIndicator={false}
                 />
-                <ShopCartFloatingButton count={cartCount} onPress={handleCartPress} />
-            </View>
-        )
-    }
-
-    return (
-        <View style={styles.container}>
-            <FlatList
-                data={products}
-                renderItem={renderProductItem}
-                keyExtractor={keyExtractor}
-                numColumns={2}
-                columnWrapperStyle={styles.columnWrapper}
-                contentContainerStyle={styles.listContent}
-                ListHeaderComponent={renderHeader}
-                ListEmptyComponent={renderEmpty}
-                ListFooterComponent={renderFooter}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                showsVerticalScrollIndicator={false}
-                refreshing={isFetching && !isLoading && !isFetchingNextPage}
-                onRefresh={refetch}
-            />
+            ) : (
+                <FlatList
+                    data={products}
+                    renderItem={renderProductItem}
+                    keyExtractor={keyExtractor}
+                    numColumns={2}
+                    columnWrapperStyle={styles.columnWrapper}
+                    contentContainerStyle={styles.listContent}
+                    ListEmptyComponent={renderEmpty}
+                    ListFooterComponent={renderFooter}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={isFetching && !isLoading && !isFetchingNextPage}
+                    onRefresh={refetch}
+                />
+            )}
 
             {/* Floating Shopping Bag Cart Button */}
             <ShopCartFloatingButton count={cartCount} onPress={handleCartPress} />
+
+            {/* Product Filter Modal */}
+            <ProductFilterModal
+                visible={isFilterModalOpen}
+                onClose={handleCloseFilter}
+                initialFilters={appliedFilters}
+                availableCategories={dynamicCategories}
+                onApplyFilters={handleApplyFilters}
+            />
         </View>
     )
 }
