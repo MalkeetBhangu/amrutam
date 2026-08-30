@@ -23,7 +23,7 @@
             "card": {
                 "consultation": "Consultation",
                 "nextSlot": "Next Slot",
-                "bookSlot": "Book slot",
+                "bookSlot": "Book an Appointment",
                 "yearsExp": "Years Exp.",
                 "today": "Today"
             },
@@ -42,6 +42,21 @@
                 "subtitle": "We couldn't find any doctors matching your current filters. Try adjusting your search or clearing filters to see more results.",
                 "clearAllFilters": "Clear All Filters",
                 "goBack": "Go Back"
+            },
+            "details": {
+                "doctorProfile": "Doctor Profile",
+                "reviews": "reviews",
+                "yrs": "yrs",
+                "exp": "exp",
+                "about": "About",
+                "specialtiesAndExpertise": "Specialties & Expertise",
+                "selectDate": "Select Date",
+                "october": "October",
+                "availableSlots": "Available Slots",
+                "morning": "Morning",
+                "afternoon": "Afternoon",
+                "consultationFee": "Consultation Fee",
+                "bookAppointment": "Book Appointment"
             }
         },
         "common": {

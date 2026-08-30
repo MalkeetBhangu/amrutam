@@ -6,6 +6,8 @@ export enum Screens {
     SHOP = 'SHOP',
     RECORDS = 'RECORDS',
     PROFILE = 'PROFILE',
+    DOCTOR_DETAILS = 'DOCTOR_DETAILS',
+    BOOKINGS = 'BOOKINGS'
 }
 
 export enum TABS {

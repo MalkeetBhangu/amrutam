@@ -29,6 +29,14 @@ const colors = {
     chipBorder: 'rgba(224, 224, 224, 1)',
     sliderTrackBg: 'rgba(230, 235, 232, 1)',
     skeletonBg: 'rgba(235, 233, 230, 1)',
+    heartActiveRed: 'rgba(229, 62, 62, 1)',
+    pillBg: 'rgba(244, 241, 234, 1)',
+    chipBg: 'rgba(236, 232, 225, 1)',
+    chipText: 'rgba(85, 81, 75, 1)',
+    selectedSubText: 'rgba(212, 236, 225, 1)',
+    disabledPillBg: 'rgba(247, 246, 244, 1)',
+    disabledPillBorder: 'rgba(239, 239, 239, 1)',
+    disabledPillText: 'rgba(176, 181, 187, 1)',
 }
 
 export default colors

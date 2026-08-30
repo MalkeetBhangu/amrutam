@@ -1,6 +1,8 @@
 import { doctors, home, profile, records, shop } from '@assets/index'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import Bookings from '@src/components/bookings/Bookings'
+import DoctorDetails from '@src/components/doctorDetails'
 import Doctors from '@src/components/doctors'
 import Home from '@src/components/home'
 import Profile from '@src/components/profile'
@@ -29,6 +31,8 @@ const DoctorsNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.DOCTORS} screenOptions={{ headerShown: false }}>
             <Stack.Screen name={Screens.DOCTORS} component={Doctors} />
+            <Stack.Screen name={Screens.DOCTOR_DETAILS} component={DoctorDetails} />
+            <Stack.Screen name={Screens.BOOKINGS} component={Bookings} />
         </Stack.Navigator>
     )
 }

@@ -19,6 +19,8 @@ export interface Doctor {
     availableToday: boolean
     verified: boolean
     consultationDuration: number
+    hasBooking?: boolean
+    hasBookings?: boolean
     slots: DoctorSlot[]
 }
 
@@ -35,3 +37,48 @@ export interface GetDoctorsResponse {
     data: Doctor[]
     pagination?: PaginationInfo
 }
+
+export interface SlotItem {
+    id: string
+    startTime: string
+    endTime: string
+    available: boolean
+}
+
+export interface DateSlotGroup {
+    date: string
+    slots: SlotItem[]
+}
+
+export interface BookingItem {
+    doctorId: string
+    doctorName?: string
+    date: string
+    slot: {
+        id: string
+        startTime: string
+        endTime: string
+        available?: boolean
+        booked?: boolean
+        status?: string
+    }
+}
+
+export interface DoctorSlotsRangeData {
+    doctorId: string
+    doctorName: string
+    from?: string
+    to?: string
+    date?: string
+    dates?: DateSlotGroup[]
+    slots?: SlotItem[]
+    bookings?: BookingItem[]
+    hasBooking?: boolean
+    hasBookings?: boolean
+}
+
+export interface GetDoctorSlotsRangeResponse {
+    success: boolean
+    data: DoctorSlotsRangeData
+}
+
