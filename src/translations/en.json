@@ -59,6 +59,22 @@
                 "bookAppointment": "Book Appointment"
             }
         },
+        "cart": {
+            "title": "Cart",
+            "itemsInCart": "Items in your cart",
+            "emptyCartTitle": "Your cart is feeling light",
+            "emptyCartSubtitle": "Discover our range of Ayurvedic essentials and start your wellness journey today.",
+            "shopNow": "Shop Now",
+            "applyPromoCode": "Apply Promo Code",
+            "orderSummary": "Order Summary",
+            "subtotal": "Subtotal",
+            "deliveryFee": "Delivery fee",
+            "taxes": "Taxes",
+            "total": "Total",
+            "ecoBannerText": "Your order will be packed in 100% biodegradable materials, supporting our commitment to Mother Earth.",
+            "checkout": "Checkout",
+            "clear": "Clear"
+        },
         "common": {
             "appName": "Amrutam",
             "comingSoon": "Coming Soon 🚀",

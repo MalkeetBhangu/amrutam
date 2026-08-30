@@ -22,5 +22,11 @@ export { default as sunIcon } from './images/SunIcon.svg'
 export { default as arrowRight } from './images/ArrowRight.svg'
 export { default as calender } from './images/Calender.svg'
 export { default as meet } from './images/Meet.svg'
+export { default as plus } from './images/PlusIcon.svg'
+export { default as minus } from './images/MinusIcon.svg'
+export { default as bag } from './images/BagIcon.svg'
+export { default as trash } from './images/TrashIcon.svg'
+export { default as promo } from './images/PromoIcon.svg'
+export { default as emptyBasket } from './images/EmptyBasket.svg'
 
 
