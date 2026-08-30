@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, View, Image } from 'react-native'
+import { Pressable, StyleSheet, View, Image } from 'react-native'
 import { star as StarIcon, briefcase as BriefcaseIcon, globe as GlobeIcon, verified as VerifiedIcon } from 'assets'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
@@ -7,15 +7,21 @@ import Button from 'src/components/sharedComponents/Button'
 import { getTexts } from 'src/translations/TranslationHelper'
 import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
+import { useNavigation } from '@react-navigation/native'
+import { Screens } from '@src/constants/Screens'
 
 export interface DoctorCardProps {
     doctor: any
-    onBookSlotPress?: (doctor: any) => void
 }
 
-const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBookSlotPress }) => {
+const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
     const t = getTexts(DEFAULT_LANGUAGE_CODE)
     const cardTranslations = (t.doctors as any)?.card || {}
+    const navigation = useNavigation<any>()
+
+    const handlePressDoctor = () => {
+        navigation.navigate(Screens.DOCTOR_DETAILS, { doctor })
+    }
 
     const rawImage = doctor?.image || doctor?.imageUri
     const imageSource = rawImage
@@ -34,65 +40,61 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBookSlotPress }) => {
     const consultationFee = doctor?.consultationFee ?? 0
     const nextSlotText = doctor?.slots?.[0]?.time ? `${cardTranslations.today}, ${doctor.slots[0].time}` : (doctor?.nextSlot || '')
 
-    return (
-        <View style={styles.cardContainer}>
-            <View style={styles.topSection}>
-                <View style={styles.avatarContainer}>
-                    <Image source={imageSource} style={styles.avatarImage} resizeMode="cover" />
-                    {isVerified && (
-                        <View style={styles.badgeWrapper}>
-                            <VerifiedIcon width={getHeight(20)} height={getHeight(20)} />
-                        </View>
-                    )}
-                </View>
+            const hasBooking = Boolean(doctor?.hasBooking ?? doctor?.hasBookings)
+            const buttonTitle = hasBooking ? 'My bookings' : (cardTranslations.bookSlot || 'Book an Appointment')
 
-                <View style={styles.infoColumn}>
-                    <View style={styles.nameRow}>
-                        <TextView text={doctor?.name || ''} style={styles.doctorName} numberOfLines={1} />
-                        <View style={styles.ratingBadge}>
-                            <StarIcon width={getHeight(12)} height={getHeight(12)} />
-                            <TextView text={ratingText} style={styles.ratingText} />
+            return (
+                <Pressable style={styles.cardContainer} onPress={handlePressDoctor}>
+                    <View style={styles.topSection}>
+                        <View style={styles.avatarContainer}>
+                            <Image source={imageSource} style={styles.avatarImage} resizeMode="cover" />
+                            {isVerified && (
+                                <View style={styles.badgeWrapper}>
+                                    <VerifiedIcon width={getHeight(20)} height={getHeight(20)} />
+                                </View>
+                            )}
+                        </View>
+
+                        <View style={styles.infoColumn}>
+                            <View style={styles.nameRow}>
+                                <TextView text={doctor?.name || ''} style={styles.doctorName} numberOfLines={1} />
+                                <View style={styles.ratingBadge}>
+                                    <StarIcon width={getHeight(12)} height={getHeight(12)} />
+                                    <TextView text={ratingText} style={styles.ratingText} />
+                                </View>
+                            </View>
+
+                            <TextView text={specialtyText} style={styles.specialtyText} numberOfLines={1} />
+
+                            <View style={styles.metaRow}>
+                                <View style={styles.metaItem}>
+                                    <BriefcaseIcon width={getHeight(14)} height={getHeight(14)} />
+                                    <TextView text={`${experienceYears} ${cardTranslations.yearsExp}`} style={styles.metaText} />
+                                </View>
+
+                                <TextView text="•" style={styles.dotSeparator} />
+
+                                <View style={styles.languagesContainer}>
+                                    <GlobeIcon width={getHeight(14)} height={getHeight(14)} />
+                                    <TextView text={languagesText} style={styles.languagesText} numberOfLines={2} />
+                                </View>
+                            </View>
                         </View>
                     </View>
 
-                    <TextView text={specialtyText} style={styles.specialtyText} numberOfLines={1} />
-
-                    <View style={styles.metaRow}>
-                        <View style={styles.metaItem}>
-                            <BriefcaseIcon width={getHeight(14)} height={getHeight(14)} />
-                            <TextView text={`${experienceYears} ${cardTranslations.yearsExp}`} style={styles.metaText} />
-                        </View>
-
-                        <TextView text="•" style={styles.dotSeparator} />
-
-                        <View style={styles.languagesContainer}>
-                            <GlobeIcon width={getHeight(14)} height={getHeight(14)} />
-                            <TextView text={languagesText} style={styles.languagesText} numberOfLines={2} />
-                        </View>
+                    <View style={styles.consultationContainer}>
+                        <TextView text={cardTranslations.consultation || 'Consultation'} style={styles.boxLabel} />
+                        <TextView text={`₹${consultationFee}`} style={styles.boxValueDark} />
                     </View>
-                </View>
-            </View>
 
-            <View style={styles.slotsRow}>
-                <View style={styles.infoBox}>
-                    <TextView text={cardTranslations.consultation} style={styles.boxLabel} />
-                    <TextView text={`₹${consultationFee}`} style={styles.boxValueDark} />
-                </View>
-
-                <View style={styles.infoBox}>
-                    <TextView text={cardTranslations.nextSlot} style={styles.boxLabel} />
-                    <TextView text={nextSlotText} style={styles.boxValueGreen} numberOfLines={1} />
-                </View>
-            </View>
-
-            <Button
-                title={cardTranslations.bookSlot || 'Book slot'}
-                onPress={() => onBookSlotPress?.(doctor)}
-                variant="primary"
-                style={styles.bookButton}
-            />
-        </View>
-    )
+                    <Button
+                        title={buttonTitle}
+                        onPress={handlePressDoctor}
+                        variant="primary"
+                        style={styles.bookButton}
+                    />
+                </Pressable>
+            )
 }
 
 const styles = StyleSheet.create({
@@ -192,18 +194,12 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         marginHorizontal: 6,
     },
-    slotsRow: {
-        flexDirection: 'row',
-        marginTop: 16,
-        justifyContent: 'space-between',
-    },
-    infoBox: {
-        flex: 1,
+    consultationContainer: {
         backgroundColor: colors.infoBoxBg,
         borderRadius: getHeight(14),
         paddingVertical: 12,
         paddingHorizontal: 12,
-        marginRight: 10,
+        marginTop: 16,
         alignItems: 'center',
     },
     boxLabel: {
@@ -214,10 +210,7 @@ const styles = StyleSheet.create({
     boxValueDark: {
         fontSize: getHeight(16),
         color: colors.textDark,
-    },
-    boxValueGreen: {
-        fontSize: getHeight(14),
-        color: colors.darkGreen,
+        fontWeight: '700',
     },
     bookButton: {
         marginTop: 14,

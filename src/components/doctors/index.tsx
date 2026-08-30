@@ -8,6 +8,8 @@ import NoDoctorsFound from './NoDoctorsFound'
 import DoctorFilterModal, { FilterState } from './DoctorFilterModal'
 import colors from 'src/tokens/Colors'
 import { useGetDoctors } from '@src/apis/useGetDoctors'
+import useGetBookings from '@src/apis/useGetBookings'
+import useCompleteBooking, { checkIfBookingTimePassed } from '@src/apis/useCompleteBooking'
 import { QUERY_KEYS } from '@src/apis/ApiConstants'
 
 const Doctors = () => {
@@ -18,6 +20,17 @@ const Doctors = () => {
     const [activeFilters, setActiveFilters] = useState<FilterState | undefined>(undefined)
     const [allExpertiseOptions, setAllExpertiseOptions] = useState<string[]>([])
     const [allLanguageOptions, setAllLanguageOptions] = useState<string[]>([])
+
+    const { data: bookingsData } = useGetBookings()
+    const { mutate: completeBooking } = useCompleteBooking()
+
+    const allBookingsList = useMemo(() => {
+        if (Array.isArray(bookingsData?.data?.bookings)) return bookingsData.data.bookings
+        if (Array.isArray(bookingsData?.bookings)) return bookingsData.bookings
+        if (Array.isArray(bookingsData?.data)) return bookingsData.data
+        if (Array.isArray(bookingsData)) return bookingsData
+        return []
+    }, [bookingsData])
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -38,6 +51,81 @@ const Doctors = () => {
     )
 
     const { doctors, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isFetching, refetch } = useGetDoctors(apiFilters)
+
+    const firstUpcomingBooking = useMemo(() => {
+        if (!bookingsData) return null
+
+        let list: any[] = []
+        if (Array.isArray(bookingsData?.data?.bookings)) {
+            list = bookingsData.data.bookings
+        } else if (Array.isArray(bookingsData?.bookings)) {
+            list = bookingsData.bookings
+        } else if (Array.isArray(bookingsData?.data)) {
+            list = bookingsData.data
+        } else if (Array.isArray(bookingsData)) {
+            list = bookingsData
+        } else if (bookingsData?.data && typeof bookingsData.data === 'object') {
+            list = [bookingsData.data]
+        }
+
+        const activeBooking = list.find((b: any) => {
+            if (!b) return false
+            const isCancelledOrCompleted =
+                b.status === 'cancelled' ||
+                b.status === 'completed' ||
+                b.booked === false ||
+                b.slot?.booked === false ||
+                b.slot?.status === 'cancelled' ||
+                b.slot?.status === 'completed' ||
+                checkIfBookingTimePassed(b.date, b.slot)
+
+            if (isCancelledOrCompleted) {
+                return false
+            }
+            return Boolean(b.doctorId || b.doctorName || b.doctor || b.slot)
+        })
+
+        if (!activeBooking) return null
+
+        const matchedDoctor: any = Array.isArray(doctors)
+            ? doctors.find((d: any) => d.id === activeBooking.doctorId || d._id === activeBooking.doctorId)
+            : null
+
+        if (matchedDoctor) {
+            return {
+                ...activeBooking,
+                doctor: matchedDoctor,
+                specialization:
+                    activeBooking.specialization ||
+                    activeBooking.specialty ||
+                    matchedDoctor.specialization ||
+                    matchedDoctor.specialty ||
+                    matchedDoctor.category,
+            }
+        }
+
+        return activeBooking
+    }, [bookingsData, doctors])
+
+    useEffect(() => {
+        if (bookingsData) {
+            let list: any[] = []
+            if (Array.isArray(bookingsData?.data?.bookings)) list = bookingsData.data.bookings
+            else if (Array.isArray(bookingsData?.bookings)) list = bookingsData.bookings
+            else if (Array.isArray(bookingsData?.data)) list = bookingsData.data
+
+            list.forEach((b: any) => {
+                if (b && b.status !== 'completed' && b.status !== 'cancelled' && checkIfBookingTimePassed(b.date, b.slot)) {
+                    console.log('Auto-completing past booking:', b)
+                    completeBooking({
+                        doctorId: b.doctorId || b.doctor?.id || '',
+                        date: b.date || '',
+                        slotId: b.slot?.id || b.slotId || '',
+                    })
+                }
+            })
+        }
+    }, [bookingsData, completeBooking])
 
     useEffect(() => {
         if (doctors && doctors.length > 0) {
@@ -66,9 +154,6 @@ const Doctors = () => {
         }
     }, [doctors])
 
-    const handleBookSlot = useCallback((doctor: any) => {
-        console.log('Book slot pressed for:', doctor?.name)
-    }, [])
 
     const handleOpenFilter = useCallback(() => {
         setIsFilterModalVisible(true)
@@ -112,8 +197,8 @@ const Doctors = () => {
     const keyExtractor = useCallback((item: any, index: number) => item.id || item._id || String(index), [])
 
     const renderItem = useCallback(({ item }: { item: any }) => (
-        <DoctorCard doctor={item} onBookSlotPress={handleBookSlot} />
-    ), [handleBookSlot])
+        <DoctorCard doctor={item} />
+    ), [])
 
     const renderFooter = useCallback(() => {
         if (!isFetchingNextPage) return null
@@ -132,7 +217,7 @@ const Doctors = () => {
                 data={showSkeleton ? [1, 2, 3] : doctors}
                 keyExtractor={showSkeleton ? (item) => String(item) : keyExtractor}
                 renderItem={showSkeleton ? () => <DoctorCardSkeleton /> : renderItem}
-                ListHeaderComponent={<DoctorHeader onFilterPress={handleOpenFilter} searchQuery={searchQuery} onSearchChange={setSearchQuery} />}
+                ListHeaderComponent={<DoctorHeader onFilterPress={handleOpenFilter} searchQuery={searchQuery} onSearchChange={setSearchQuery} upcomingBooking={firstUpcomingBooking} allBookings={allBookingsList} />}
                 ListEmptyComponent={showSkeleton ? null : <NoDoctorsFound onClearFilters={handleClearAllFilters} onGoBack={handleGoBack} />}
                 ListFooterComponent={showSkeleton || doctors.length === 0 ? null : renderFooter}
                 onEndReached={showSkeleton || doctors.length === 0 ? undefined : handleLoadMore}

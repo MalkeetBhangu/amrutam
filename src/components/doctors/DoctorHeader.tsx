@@ -8,16 +8,22 @@ import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import TextInput from '@src/components/sharedComponents/TextInput'
 import TextView from '@src/components/sharedComponents/TextView'
 
+import UpcomingConsultationCard from './UpcomingConsultationCard'
+
 export interface DoctorHeaderProps {
     onFilterPress?: () => void
     searchQuery?: string
     onSearchChange?: (text: string) => void
+    upcomingBooking?: any
+    allBookings?: any[]
 }
 
 const DoctorHeader: React.FC<DoctorHeaderProps> = ({
     onFilterPress,
     searchQuery: externalSearchQuery,
     onSearchChange,
+    upcomingBooking,
+    allBookings,
 }) => {
     const t = getTexts(DEFAULT_LANGUAGE_CODE)
     const [internalSearchQuery, setInternalSearchQuery] = useState('')
@@ -42,6 +48,8 @@ const DoctorHeader: React.FC<DoctorHeaderProps> = ({
                     <Image source={{ uri: DEFAULT_AVATAR }} style={styles.avatarImage} resizeMode="cover" />
                 </Pressable>
             </View>
+
+            {Boolean(upcomingBooking) && <UpcomingConsultationCard booking={upcomingBooking} allBookings={allBookings} />}
 
             <View style={styles.titleSection}>
                 <TextView style={styles.titleText} text={t.doctors.findDoctorTitle} />
