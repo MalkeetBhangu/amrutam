@@ -144,6 +144,13 @@ const Shop: React.FC = () => {
         setAppliedFilters(filters)
     }, [])
 
+    const handleProductPress = useCallback(
+        (product: ProductItem) => {
+            navigation.navigate(Screens.PRODUCT_DETAIL, { product })
+        },
+        [navigation]
+    )
+
     const renderProductItem = useCallback(
         ({ item }: { item: ProductItem }) => {
             const isInCart = cartProductIds.has(item.id)
@@ -156,10 +163,11 @@ const Shop: React.FC = () => {
                     onAddToCart={handleAddToCart}
                     onToggleWishlist={handleToggleWishlist}
                     onOpenCart={handleCartPress}
+                    onPress={handleProductPress}
                 />
             )
         },
-        [cartProductIds, wishlistProductIds, handleAddToCart, handleToggleWishlist, handleCartPress]
+        [cartProductIds, wishlistProductIds, handleAddToCart, handleToggleWishlist, handleCartPress, handleProductPress]
     )
 
     const renderSkeletonItem = useCallback(() => <ProductCardSkeleton />, [])

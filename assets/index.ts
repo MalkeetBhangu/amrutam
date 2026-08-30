@@ -29,5 +29,5 @@ export { default as bag } from './images/BagIcon.svg'
 export { default as trash } from './images/TrashIcon.svg'
 export { default as promo } from './images/PromoIcon.svg'
 export { default as emptyBasket } from './images/EmptyBasket.svg'
-
-
+export { default as share } from './images/ShareIcon.svg'
+export { default as whiteBack } from './images/WhiteBack.svg'

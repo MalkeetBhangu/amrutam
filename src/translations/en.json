@@ -98,6 +98,20 @@
                 "applyFilters": "Apply Filters"
             }
         },
+        "productDetail": {
+            "title": "Product details",
+            "bestseller": "Bestseller",
+            "reviews": "reviews",
+            "inStock": "In stock",
+            "left": "left",
+            "off": "off",
+            "aboutProduct": "About this product",
+            "defaultAbout": "A traditional herbal formulation from Amrutam, crafted to support revitalizing herbal care as part of your daily Ayurvedic routine.",
+            "quantity": "Quantity",
+            "addToCart": "Add to cart",
+            "buyNow": "Buy now",
+            "addedToCart": "Added to cart successfully!"
+        },
         "common": {
             "appName": "Amrutam",
             "comingSoon": "Coming Soon 🚀",

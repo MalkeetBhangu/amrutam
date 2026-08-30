@@ -9,7 +9,8 @@ export enum Screens {
     WISHLIST = 'WISHLIST',
     DOCTOR_DETAILS = 'DOCTOR_DETAILS',
     BOOKINGS = 'BOOKINGS',
-    CART = 'CART'
+    CART = 'CART',
+    PRODUCT_DETAIL = 'PRODUCT_DETAIL'
 }
 
 export enum TABS {

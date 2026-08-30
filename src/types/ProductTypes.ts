@@ -16,6 +16,9 @@ export interface ProductItem {
     inStock?: boolean
     badge?: string
     tags?: string[]
+    size?: string
+    weight?: string
+    description?: string
     isWishlisted?: boolean
     image?: string | null
     createdAt?: string

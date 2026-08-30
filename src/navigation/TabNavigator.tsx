@@ -1,3 +1,6 @@
+import React from 'react'
+import { StyleSheet, View, StatusBar } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { doctors, home, profile, records, shop } from '@assets/index'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
@@ -11,19 +14,25 @@ import Records from '@src/components/records'
 import Shop from '@src/components/shop'
 import { getHeight } from '@src/libs/StyleHelper'
 import colors from '@src/tokens/Colors'
-import React from 'react'
-import { StyleSheet, View } from 'react-native'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { Screens, TABS } from 'src/constants/Screens'
 import { getTexts } from 'src/translations/TranslationHelper'
+import ProductDetail from '@src/components/productDetail'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator<any>()
 
+const withTopSafeArea = (Component: React.ComponentType<any>) => (props: any) => (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.screenBackground }} edges={['top']}>
+        <StatusBar barStyle="dark-content" backgroundColor={colors.screenBackground} />
+        <Component {...props} />
+    </SafeAreaView>
+)
+
 export const HomeNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.HOME} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={Screens.HOME} component={Home} />
+            <Stack.Screen name={Screens.HOME} component={withTopSafeArea(Home)} />
         </Stack.Navigator>
     )
 }
@@ -31,9 +40,9 @@ export const HomeNavigator = () => {
 const DoctorsNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.DOCTORS} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={Screens.DOCTORS} component={Doctors} />
-            <Stack.Screen name={Screens.DOCTOR_DETAILS} component={DoctorDetails} />
-            <Stack.Screen name={Screens.BOOKINGS} component={Bookings} />
+            <Stack.Screen name={Screens.DOCTORS} component={withTopSafeArea(Doctors)} />
+            <Stack.Screen name={Screens.DOCTOR_DETAILS} component={withTopSafeArea(DoctorDetails)} />
+            <Stack.Screen name={Screens.BOOKINGS} component={withTopSafeArea(Bookings)} />
         </Stack.Navigator>
     )
 }
@@ -41,8 +50,9 @@ const DoctorsNavigator = () => {
 const ShopNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.SHOP} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={Screens.SHOP} component={Shop} />
-            <Stack.Screen name={Screens.CART} component={Cart} />
+            <Stack.Screen name={Screens.SHOP} component={withTopSafeArea(Shop)} />
+            <Stack.Screen name={Screens.CART} component={withTopSafeArea(Cart)} />
+            <Stack.Screen name={Screens.PRODUCT_DETAIL} component={ProductDetail} />
         </Stack.Navigator>
     )
 }
@@ -50,7 +60,7 @@ const ShopNavigator = () => {
 const RecordsNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.RECORDS} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={Screens.RECORDS} component={Records} />
+            <Stack.Screen name={Screens.RECORDS} component={withTopSafeArea(Records)} />
         </Stack.Navigator>
     )
 }
@@ -58,9 +68,8 @@ const RecordsNavigator = () => {
 const WishListNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.WISHLIST} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={Screens.WISHLIST} component={Wishlist} />
-            <Stack.Screen name={Screens.CART} component={Cart} />
-
+            <Stack.Screen name={Screens.WISHLIST} component={withTopSafeArea(Wishlist)} />
+            <Stack.Screen name={Screens.CART} component={withTopSafeArea(Cart)} />
         </Stack.Navigator>
     )
 }
