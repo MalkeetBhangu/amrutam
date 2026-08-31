@@ -39,6 +39,10 @@ const colors = {
     disabledPillText: 'rgba(176, 181, 187, 1)',
     bookingIconBg: 'rgba(235, 245, 240, 1)',
     cancelRed: 'rgba(211, 47, 47, 1)',
+    slotTimeBoxBg: 'rgba(248, 246, 242, 1)',
+    iconCircleBg: 'rgba(235, 245, 240, 0.8)',
+    needConsultationBg: 'rgba(246, 245, 240, 1)',
+    dashedBorder: 'rgba(220, 218, 210, 0.6)',
 }
 
 export default colors

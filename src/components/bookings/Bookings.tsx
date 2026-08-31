@@ -1,124 +1,47 @@
-import React, { useCallback, useMemo } from 'react'
-import { StyleSheet, View, FlatList, Image, Pressable, Alert } from 'react-native'
-import { useNavigation, useRoute } from '@react-navigation/native'
-import colors from 'src/tokens/Colors'
-import TextView from 'src/components/sharedComponents/TextView'
-import { getHeight } from 'src/libs/StyleHelper'
-import { logo, calender as CalendarIcon, meet as MeetIcon, backArrow as BackArrowIcon } from 'assets'
-import { DEFAULT_AVATAR } from 'src/constants/Constants'
-import { Screens } from '@src/constants/Screens'
-import useGetBookings from '@src/apis/useGetBookings'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import useCancelBooking from '@src/apis/useCancelBooking'
-import { BookingItem } from 'src/types/DoctorTypes'
+import useGetBookings from '@src/apis/useGetBookings'
+import { Screens } from '@src/constants/Screens'
+import { ParamsList } from '@src/navigation/useNavigation'
 import { useUserState } from '@src/store/UseUserStore'
-
-const formatDateDisplay = (dateStr: string): string => {
-    if (!dateStr) return ''
-    const parts = dateStr.split('-')
-    if (parts.length === 3) {
-        const year = parseInt(parts[0], 10)
-        const month = parseInt(parts[1], 10) - 1
-        const day = parseInt(parts[2], 10)
-
-        const now = new Date()
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        const target = new Date(year, month, day)
-
-        const diffTime = target.getTime() - today.getTime()
-        const diffDays = Math.round(diffTime / (1000 * 3600 * 24))
-
-        if (diffDays === 0) return 'Today'
-        if (diffDays === 1) return 'Tomorrow'
-
-        const dayOfWeek = target.toLocaleDateString('en-US', { weekday: 'short' })
-        const monthName = target.toLocaleDateString('en-US', { month: 'short' })
-        return `${dayOfWeek}, ${day} ${monthName}`
-    }
-    return dateStr
-}
-
-const formatTimeDisplay = (startTime: string, endTime?: string): string => {
-    if (!startTime) return ''
-
-    const formatSingleTime = (t: string) => {
-        if (!t) return ''
-        if (t.includes('AM') || t.includes('PM')) return t
-        const parts = t.trim().split(':')
-        if (parts.length >= 2) {
-            let hours = parseInt(parts[0], 10)
-            const minutes = parts[1]
-            const ampm = hours >= 12 ? 'PM' : 'AM'
-            hours = hours % 12 || 12
-            return `${hours}:${minutes} ${ampm}`
-        }
-        return t
-    }
-
-    const startFormatted = formatSingleTime(startTime)
-    const endFormatted = endTime ? formatSingleTime(endTime) : ''
-
-    if (startFormatted && endFormatted) {
-        return `${startFormatted} – ${endFormatted}`
-    }
-    return startFormatted || endFormatted || ''
-}
+import { backArrow as BackArrowIcon, calender as CalendarIcon, meet as MeetIcon } from 'assets'
+import React, { useCallback } from 'react'
+import { Alert, FlatList, Image, Pressable, StyleSheet, View } from 'react-native'
+import TextView from 'src/components/sharedComponents/TextView'
+import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { getHeight } from 'src/libs/StyleHelper'
+import colors from 'src/tokens/Colors'
+import { getTexts } from 'src/translations/TranslationHelper'
+import { BookingItem } from 'src/types/DoctorTypes'
+import { formatDateDisplay, formatTimeDisplay } from '../doctorDetails/DoctorHelper'
 
 const Bookings: React.FC = () => {
-    const { userData: { userId } } = useUserState(['userId'])
-    const navigation = useNavigation<any>()
-    const route = useRoute<any>()
-    const routeBookings = route.params?.bookings
-
-    const { data: bookingsData } = useGetBookings()
+    const { userData: { userId, languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['userId', 'languageCode'])
+    const t = getTexts(languageCode)
+    const bookingTranslations = t.doctors?.bookings || {}
+    const navigation = useNavigation<StackNavigationProp<ParamsList, Screens.DOCTORS>>()
+    const { data: bookingsData } = useGetBookings(userId)
     const { mutate: cancelBooking, isPending: isCancelling } = useCancelBooking()
 
-    const handleBackPress = useCallback(() => {
-        navigation.goBack()
-    }, [navigation])
+    const handleBackPress = useCallback(() => { navigation.goBack() }, [navigation])
 
-    const bookingsList: BookingItem[] = useMemo(() => {
-        let rawList: any[] = []
-        if (Array.isArray(bookingsData?.data?.bookings)) {
-            rawList = bookingsData.data.bookings
-        } else if (Array.isArray(bookingsData?.bookings)) {
-            rawList = bookingsData.bookings
-        } else if (Array.isArray(bookingsData?.data)) {
-            rawList = bookingsData.data
-        } else if (Array.isArray(routeBookings)) {
-            rawList = routeBookings
-        }
-
-        return rawList.filter((b: any) => {
-            if (!b) return false
-            if (b.status === 'cancelled' || b.booked === false || b.slot?.status === 'cancelled' || b.slot?.booked === false) {
-                return false
-            }
-            return true
-        })
-    }, [bookingsData, routeBookings])
-
-    const handleGoToDoctors = useCallback(() => {
-        navigation.navigate(Screens.DOCTORS)
-    }, [navigation])
+    const handleGoToDoctors = useCallback(() => { navigation.navigate(Screens.DOCTORS) }, [navigation])
 
     const handleCancelBookingPrompt = useCallback(
         (booking: BookingItem | any) => {
             Alert.alert(
-                'Cancel Booking',
-                'Are you sure you want to cancel this booking?',
+                bookingTranslations.cancelBooking,
+                bookingTranslations.cancelConfirm,
                 [
-                    { text: 'Cancel', style: 'cancel' },
+                    { text: bookingTranslations.cancel, style: 'cancel' },
                     {
-                        text: 'OK',
+                        text: bookingTranslations.ok,
                         style: 'destructive',
                         onPress: () => {
-                            const targetDoctorId =
-                                booking?.doctorId ||
-                                booking?.doctor?.id ||
-                                booking?.doctor?._id ||
-                                'doctor_0001'
+                            const targetDoctorId = booking?.doctorId
                             const targetDate = booking?.date || ''
-                            const targetSlotId = booking?.slot?.id || booking?.slotId || ''
+                            const targetSlotId = booking?.slot?.id || ''
 
                             cancelBooking(
                                 {
@@ -130,13 +53,22 @@ const Bookings: React.FC = () => {
                                 {
                                     onSuccess: (data: any) => {
                                         if (data && data.success === false) {
-                                            Alert.alert('Error', data.message || 'Failed to cancel booking.')
+                                            Alert.alert(
+                                                bookingTranslations.errorTitle,
+                                                data.message || bookingTranslations.errorMessage
+                                            )
                                             return
                                         }
-                                        Alert.alert('Success', 'Booking cancelled successfully!')
+                                        Alert.alert(
+                                            bookingTranslations.successTitle,
+                                            bookingTranslations.cancelSuccess
+                                        )
                                     },
                                     onError: (err: any) => {
-                                        Alert.alert('Error', err?.message || 'Failed to cancel booking.')
+                                        Alert.alert(
+                                            bookingTranslations.errorTitle,
+                                            err?.message || bookingTranslations.errorMessage
+                                        )
                                     },
                                 }
                             )
@@ -145,13 +77,10 @@ const Bookings: React.FC = () => {
                 ]
             )
         },
-        [cancelBooking]
+        [bookingTranslations, cancelBooking, userId]
     )
 
-    const keyExtractor = useCallback(
-        (item: BookingItem | any, index: number) => item?.slot?.id || `${item?.date}-${index}`,
-        []
-    )
+    const keyExtractor = useCallback((item: BookingItem | any) => item?.slot?.id, [])
 
     const renderHeader = useCallback(
         () => (
@@ -161,12 +90,12 @@ const Bookings: React.FC = () => {
                 </Pressable>
 
                 <View style={styles.titleSection}>
-                    <TextView style={styles.titleText} text="My Bookings" />
-                    <TextView style={styles.subtitleText} text="Manage your upcoming Ayurvedic consultations." />
+                    <TextView style={styles.titleText} text={bookingTranslations.title} />
+                    <TextView style={styles.subtitleText} text={bookingTranslations.subtitle} />
                 </View>
             </View>
         ),
-        [handleBackPress]
+        [bookingTranslations.subtitle, bookingTranslations.title, handleBackPress]
     )
 
     const renderFooter = useCallback(
@@ -175,83 +104,65 @@ const Bookings: React.FC = () => {
                 <View style={styles.calendarIconCircle}>
                     <CalendarIcon width={getHeight(22)} height={getHeight(22)} color={colors.darkGreen} />
                 </View>
-                <TextView text="Need another consultation?" style={styles.needConsultationTitle} />
+                <TextView text={bookingTranslations.needConsultationTitle} style={styles.needConsultationTitle} />
                 <TextView
-                    text="Book a new appointment with our Ayurvedic experts."
+                    text={bookingTranslations.needConsultationSubtitle}
                     style={styles.needConsultationSubtitle}
                 />
                 <Pressable style={styles.findDoctorButton} onPress={handleGoToDoctors}>
-                    <TextView text="Find a Doctor" style={styles.findDoctorButtonText} />
+                    <TextView text={bookingTranslations.findDoctor} style={styles.findDoctorButtonText} />
                 </Pressable>
             </View>
         ),
-        [handleGoToDoctors]
+        [bookingTranslations.findDoctor, bookingTranslations.needConsultationSubtitle, bookingTranslations.needConsultationTitle, handleGoToDoctors]
     )
 
-    const renderBookingCard = useCallback(
-        ({ item }: { item: BookingItem | any }) => {
-            const doctorName = item?.doctorName || item?.doctor?.name || 'Dr. Rekha Sharma'
-            const specialty =
-                item?.specialization ||
-                item?.specialty ||
-                item?.doctor?.specialization ||
-                item?.doctor?.specialty ||
-                'Ayurvedic Specialist'
-            const avatarUri = item?.doctorImage || item?.doctor?.image || DEFAULT_AVATAR
+    const renderBookingCard = useCallback(({ item }: { item: BookingItem | any }) => {
+        const doctorName = item?.doctorName
+        const specialty = item?.specialization
+        const avatarUri = item?.doctor?.image || DEFAULT_AVATAR
+        const dateStr = item?.date || ''
+        const startTime = item?.slot?.startTime || item?.startTime || ''
+        const endTime = item?.slot?.endTime || item?.endTime || ''
+        const dateFormatted = formatDateDisplay(dateStr)
+        const timeFormatted = formatTimeDisplay(startTime, endTime)
 
-            const dateStr = item?.date || ''
-            const startTime = item?.slot?.startTime || item?.startTime || ''
-            const endTime = item?.slot?.endTime || item?.endTime || ''
-
-            const dateFormatted = formatDateDisplay(dateStr)
-            const timeFormatted = formatTimeDisplay(startTime, endTime)
-
-            return (
-                <View style={styles.bookingCard}>
-                    <View style={styles.doctorHeaderRow}>
-                        <Image
-                            source={typeof avatarUri === 'string' ? { uri: avatarUri } : avatarUri}
-                            style={styles.doctorAvatar}
-                            resizeMode="cover"
-                        />
-                        <View style={styles.doctorDetailsColumn}>
-                            <TextView text={doctorName} style={styles.doctorNameText} numberOfLines={1} />
-                            <TextView text={specialty} style={styles.doctorSpecialtyText} numberOfLines={1} />
-                        </View>
+        return (
+            <View style={styles.bookingCard}>
+                <View style={styles.doctorHeaderRow}>
+                    <Image source={{ uri: avatarUri }} style={styles.doctorAvatar} resizeMode="cover" />
+                    <View style={styles.doctorDetailsColumn}>
+                        <TextView text={doctorName} style={styles.doctorNameText} numberOfLines={1} />
+                        <TextView text={specialty} style={styles.doctorSpecialtyText} numberOfLines={1} />
                     </View>
-
-                    <View style={styles.slotTimeBox}>
-                        <View style={styles.slotTimeLeft}>
-                            <CalendarIcon width={getHeight(18)} height={getHeight(18)} color={colors.darkGreen} />
-                            <View style={styles.slotTimeTextColumn}>
-                                <TextView text={dateFormatted} style={styles.slotDateText} />
-                                {Boolean(timeFormatted) && (
-                                    <TextView text={timeFormatted} style={styles.slotTimeText} />
-                                )}
-                            </View>
-                        </View>
-                        <View style={styles.iconCircle}>
-                            <MeetIcon width={getHeight(18)} height={getHeight(18)} color={colors.darkGreen} />
-                        </View>
-                    </View>
-
-                    <Pressable
-                        disabled={isCancelling}
-                        onPress={() => handleCancelBookingPrompt(item)}
-                        style={styles.cancelButton}
-                    >
-                        <TextView text="Cancel" style={styles.cancelButtonText} />
-                    </Pressable>
                 </View>
-            )
-        },
-        [handleCancelBookingPrompt, isCancelling]
+
+                <View style={styles.slotTimeBox}>
+                    <View style={styles.slotTimeLeft}>
+                        <CalendarIcon width={getHeight(18)} height={getHeight(18)} color={colors.darkGreen} />
+                        <View style={styles.slotTimeTextColumn}>
+                            <TextView text={dateFormatted} style={styles.slotDateText} />
+                            {timeFormatted && <TextView text={timeFormatted} style={styles.slotTimeText} />}
+                        </View>
+                    </View>
+                    <View style={styles.iconCircle}>
+                        <MeetIcon width={getHeight(18)} height={getHeight(18)} color={colors.darkGreen} />
+                    </View>
+                </View>
+
+                <Pressable disabled={isCancelling} onPress={() => handleCancelBookingPrompt(item)} style={styles.cancelButton} >
+                    <TextView text={bookingTranslations.cancel} style={styles.cancelButtonText} />
+                </Pressable>
+            </View>
+        )
+    },
+        [bookingTranslations.cancel, handleCancelBookingPrompt, isCancelling]
     )
 
     return (
         <View style={styles.container}>
             <FlatList
-                data={bookingsList}
+                data={bookingsData?.data?.bookings ?? []}
                 keyExtractor={keyExtractor}
                 renderItem={renderBookingCard}
                 ListHeaderComponent={renderHeader}
@@ -366,7 +277,7 @@ const styles = StyleSheet.create({
         marginTop: 3,
     },
     slotTimeBox: {
-        backgroundColor: '#F8F6F2',
+        backgroundColor: colors.slotTimeBoxBg,
         borderRadius: getHeight(12),
         paddingHorizontal: 14,
         paddingVertical: 12,
@@ -397,7 +308,7 @@ const styles = StyleSheet.create({
         width: getHeight(36),
         height: getHeight(36),
         borderRadius: getHeight(18),
-        backgroundColor: 'rgba(235, 245, 240, 0.8)',
+        backgroundColor: colors.iconCircleBg,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -419,21 +330,21 @@ const styles = StyleSheet.create({
         color: colors.textDark,
     },
     needConsultationCard: {
-        backgroundColor: '#F6F5F0',
+        backgroundColor: colors.needConsultationBg,
         borderRadius: getHeight(20),
         padding: 24,
         alignItems: 'center',
         marginTop: 12,
         marginBottom: 20,
         borderWidth: 1,
-        borderColor: 'rgba(220, 218, 210, 0.6)',
+        borderColor: colors.dashedBorder,
         borderStyle: 'dashed',
     },
     calendarIconCircle: {
         width: getHeight(52),
         height: getHeight(52),
         borderRadius: getHeight(26),
-        backgroundColor: 'rgba(235, 245, 240, 1)',
+        backgroundColor: colors.bookingIconBg,
         alignItems: 'center',
         justifyContent: 'center',
     },

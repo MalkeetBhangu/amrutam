@@ -26,7 +26,7 @@ const fetchBookSlot = async (payload: BookSlotPayload) => {
     const data = await response.json()
     return data
 }
-``
+
 const useBookSlot = (userId: string, doctorId?: string, date?: string, slotId?: string) => {
     const queryClient = useQueryClient()
     const queryResult = useMutation<GetDoctorSlotsRangeResponse, Error, BookSlotPayload | void>({
@@ -44,6 +44,7 @@ const useBookSlot = (userId: string, doctorId?: string, date?: string, slotId?: 
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCTORS_SLOTS] })
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCTORS] })
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BOOKINGS] })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCTOR_BOOKINGS] })
         },
     })
     return queryResult

@@ -9,26 +9,25 @@ import { BookingItem } from '@src/types/DoctorTypes'
 import { useUserState } from '@src/store/UseUserStore'
 import { getTexts } from 'src/translations/TranslationHelper'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
-import useGetDoctorSlots from '@src/apis/useGetDoctorSlots'
+import useGetDoctorBookings from '@src/apis/useGetDoctorBookings'
 import useCancelBooking from '@src/apis/useCancelBooking'
 import { formatDateString, formatTimeString } from './DoctorHelper'
+import { DoctorBookingDetail } from '@src/types/DoctorTypes'
 
 export interface DoctorBookingsSectionProps {
     doctorId: string
     onCancelSuccess?: () => void
 }
 
-
-
 const DoctorBookingsSection: React.FC<DoctorBookingsSectionProps> = ({ doctorId, onCancelSuccess, }) => {
     const { userData: { languageCode = DEFAULT_LANGUAGE_CODE, userId } } = useUserState(['languageCode', 'userId'])
     const t = getTexts(languageCode)
     const bookingTranslations = t.doctors?.bookings || {}
-    const { data: slotsData } = useGetDoctorSlots(doctorId, '2026-08-30', '2026-09-12')
+    const { data: bookingsResponse } = useGetDoctorBookings(doctorId, userId)
     const { mutate: cancelBooking, isPending: isCancelling } = useCancelBooking()
-    const bookings = slotsData?.data?.bookings || []
+    const bookings: DoctorBookingDetail[] = bookingsResponse?.data?.bookings || []
 
-    const handleCancelPress = (booking: BookingItem) => {
+    const handleCancelPress = (booking: DoctorBookingDetail) => {
         Alert.alert(
             bookingTranslations.cancelBooking,
             bookingTranslations.cancelConfirm,
@@ -41,9 +40,9 @@ const DoctorBookingsSection: React.FC<DoctorBookingsSectionProps> = ({ doctorId,
                         cancelBooking(
                             {
                                 userId: userId ?? '',
-                                doctorId: booking.doctorId || doctorId,
+                                doctorId: doctorId,
                                 date: booking.date,
-                                slotId: booking.slot?.id || '',
+                                slotId: booking.id || '',
                             },
                             {
                                 onSuccess: () => {
@@ -69,11 +68,11 @@ const DoctorBookingsSection: React.FC<DoctorBookingsSectionProps> = ({ doctorId,
 
             {bookings.map((booking, index) => {
                 const formattedDate = formatDateString(booking.date)
-                const slotTime = booking.slot?.startTime || booking.slot?.endTime || ''
+                const slotTime = booking.startTime || booking.endTime || ''
                 const formattedTime = formatTimeString(slotTime)
 
                 return (
-                    <View key={booking.slot?.id || `${booking.date}-${index}`} style={styles.bookingCard}>
+                    <View key={booking.id || `${booking.date}-${index}`} style={styles.bookingCard}>
                         <View style={styles.iconContainer}>
                             <CalendarIcon width={getHeight(22)} height={getHeight(22)} color={colors.darkGreen} />
                         </View>

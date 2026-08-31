@@ -17,7 +17,7 @@ const DoctorDetails: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<ParamsList>>()
     const route = useRoute<RouteProp<ParamsList, Screens.DOCTOR_DETAILS>>()
     const doctorParam = route.params?.doctor ?? ({} as any)
-    const [hasBooking, setHasBooking] = useState<boolean | null>(null)
+    const [hasBooking, setHasBooking] = useState<boolean | null>(doctorParam.hasBooking ?? null)
     const handleBackPress = useCallback(() => navigation.goBack(), [navigation])
     const handleBookingSuccess = useCallback(() => setHasBooking(true), [])
     const handleCancelSuccess = useCallback(() => setHasBooking(false), [])

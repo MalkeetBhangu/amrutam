@@ -91,3 +91,54 @@ export const formatTimeString = (timeStr: string): string => {
     }
     return timeStr
 }
+
+export const formatDateDisplay = (dateStr: string, todayText: string = 'Today', tomorrowText: string = 'Tomorrow'): string => {
+    if (!dateStr) return ''
+    const parts = dateStr.split('-')
+    if (parts.length === 3) {
+        const year = parseInt(parts[0], 10)
+        const month = parseInt(parts[1], 10) - 1
+        const day = parseInt(parts[2], 10)
+
+        const now = new Date()
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const target = new Date(year, month, day)
+
+        const diffTime = target.getTime() - today.getTime()
+        const diffDays = Math.round(diffTime / (1000 * 3600 * 24))
+
+        if (diffDays === 0) return todayText
+        if (diffDays === 1) return tomorrowText
+
+        const dayOfWeek = target.toLocaleDateString('en-US', { weekday: 'short' })
+        const monthName = target.toLocaleDateString('en-US', { month: 'short' })
+        return `${dayOfWeek}, ${day} ${monthName}`
+    }
+    return dateStr
+}
+
+export const formatTimeDisplay = (startTime: string, endTime?: string): string => {
+    if (!startTime) return ''
+
+    const formatSingleTime = (t: string) => {
+        if (!t) return ''
+        if (t.includes('AM') || t.includes('PM')) return t
+        const parts = t.trim().split(':')
+        if (parts.length >= 2) {
+            let hours = parseInt(parts[0], 10)
+            const minutes = parts[1]
+            const ampm = hours >= 12 ? 'PM' : 'AM'
+            hours = hours % 12 || 12
+            return `${hours}:${minutes} ${ampm}`
+        }
+        return t
+    }
+
+    const startFormatted = formatSingleTime(startTime)
+    const endFormatted = endTime ? formatSingleTime(endTime) : ''
+
+    if (startFormatted && endFormatted) {
+        return `${startFormatted} – ${endFormatted}`
+    }
+    return startFormatted || endFormatted || ''
+}

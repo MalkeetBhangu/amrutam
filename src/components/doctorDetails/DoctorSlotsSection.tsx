@@ -39,7 +39,8 @@ const DoctorSlotsSection: React.FC<DoctorSlotsSectionProps> = ({ doctor, onBooki
         bookSlot(
             { userId: userId ?? '', doctorId: doctor.id, date: selectedDate, slotId: selectedSlot },
             {
-                onSuccess: () => {
+                onSuccess: (data) => {
+                    console
                     onBookingSuccess?.()
                 },
                 onError: (error: any) => {

@@ -10,21 +10,19 @@ export interface GetBookingsResponse {
     bookings?: BookingItem[]
 }
 
-export const fetchBookings = async (): Promise<GetBookingsResponse> => {
-    const url = `${BASE_URL}/bookings`
-    console.log('Fetching bookings URL:', url)
-
+export const fetchBookings = async ({ queryKey }: any): Promise<GetBookingsResponse> => {
+    const [_, userId] = queryKey
+    const url = `${BASE_URL}/bookings?userId=${userId}`
     const response = await fetch(url)
     const data = await response.json()
-    console.log('Fetching bookings response:', JSON.stringify(data, null, 2))
-
     return data
 }
 
-export const useGetBookings = () => {
+export const useGetBookings = (userId?: string) => {
     return useQuery({
-        queryKey: [QUERY_KEYS.BOOKINGS],
+        queryKey: [QUERY_KEYS.BOOKINGS, userId],
         queryFn: fetchBookings,
+        enabled: Boolean(userId),
         staleTime: 0,
     })
 }

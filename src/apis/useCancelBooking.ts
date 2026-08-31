@@ -13,6 +13,7 @@ export interface CancelBookingPayload {
 const fetchCancelBooking = async (payload: CancelBookingPayload) => {
     const url = `${BASE_URL}/doctors/slots/cancel`
     const bodyObj = {
+        userId: payload.userId || '',
         doctorId: payload.doctorId || '',
         date: payload.date || '',
         slotId: payload.slotId || '',
@@ -38,6 +39,7 @@ const useCancelBooking = () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCTORS_SLOTS] })
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCTORS] })
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BOOKINGS] })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCTOR_BOOKINGS] })
             queryClient.refetchQueries({ queryKey: [QUERY_KEYS.BOOKINGS] })
             queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DOCTORS] })
         },

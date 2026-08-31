@@ -84,3 +84,28 @@ export interface GetDoctorSlotsRangeResponse {
     data: DoctorSlotsRangeData
 }
 
+export interface DoctorBookingDetail {
+    id: string
+    date: string
+    startTime: string
+    endTime: string
+    available?: boolean
+    booked?: boolean
+    status?: string
+    userId?: string
+}
+
+export interface DoctorBookingsData {
+    userId: string
+    doctorId: string
+    doctorName?: string
+    bookings: DoctorBookingDetail[]
+    totalBookings: number
+    hasBooking: boolean
+}
+
+export interface GetDoctorBookingsResponse {
+    success: boolean
+    data: DoctorBookingsData
+}
+

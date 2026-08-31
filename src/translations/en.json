@@ -71,12 +71,20 @@
             },
             "bookings": {
                 "title": "My Bookings",
+                "subtitle": "Manage your upcoming Ayurvedic consultations.",
                 "cancelBooking": "Cancel Booking",
                 "cancelConfirm": "Are you sure you want to cancel this booking?",
                 "cancel": "Cancel",
                 "ok": "OK",
+                "successTitle": "Success",
+                "cancelSuccess": "Booking cancelled successfully!",
                 "errorTitle": "Error",
-                "errorMessage": "Failed to cancel booking. Please try again."
+                "errorMessage": "Failed to cancel booking. Please try again.",
+                "needConsultationTitle": "Need another consultation?",
+                "needConsultationSubtitle": "Book a new appointment with our Ayurvedic experts.",
+                "findDoctor": "Find a Doctor",
+                "today": "Today",
+                "tomorrow": "Tomorrow"
             }
         },
         "cart": {
