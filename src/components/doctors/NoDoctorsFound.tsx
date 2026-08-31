@@ -7,6 +7,7 @@ import Button from 'src/components/sharedComponents/Button'
 import { getTexts } from 'src/translations/TranslationHelper'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface NoDoctorsFoundProps {
     onClearFilters?: () => void
@@ -14,35 +15,20 @@ export interface NoDoctorsFoundProps {
 }
 
 const NoDoctorsFound: React.FC<NoDoctorsFoundProps> = ({ onClearFilters, onGoBack }) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
-    const noResultsTranslations = (t.doctors as any)?.noResults || {}
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
+    const noResultsTranslations = t.doctors?.noResults || {}
 
     return (
         <View style={styles.container}>
             <View style={styles.illustrationContainer}>
                 <NoDoctorIllustration width={getHeight(140)} height={getHeight(140)} />
             </View>
-
             <TextView text={noResultsTranslations.title} style={styles.titleText} />
             <TextView text={noResultsTranslations.subtitle} style={styles.subtitleText} />
-
             <View style={styles.buttonGroup}>
-                {onClearFilters && (
-                    <Button
-                        title={noResultsTranslations.clearAllFilters}
-                        onPress={onClearFilters}
-                        variant="primary"
-                        leftIcon={<FilterClearIcon width={getHeight(18)} height={getHeight(18)} />}
-                    />
-                )}
-
-                {onGoBack && (
-                    <Button
-                        title={noResultsTranslations.goBack}
-                        onPress={onGoBack}
-                        variant="outline"
-                    />
-                )}
+                {onClearFilters && <Button title={noResultsTranslations.clearAllFilters} onPress={onClearFilters} variant="primary" leftIcon={<FilterClearIcon width={getHeight(18)} height={getHeight(18)} />} />}
+                {onGoBack && <Button title={noResultsTranslations.goBack} onPress={onGoBack} variant="outline" />}
             </View>
         </View>
     )

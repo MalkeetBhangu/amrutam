@@ -20,7 +20,7 @@ import { getTexts } from 'src/translations/TranslationHelper'
 import ProductDetail from '@src/components/productDetail'
 
 const Tab = createBottomTabNavigator()
-const Stack = createNativeStackNavigator<any>()
+const Stack = createNativeStackNavigator()
 
 const withTopSafeArea = (Component: React.ComponentType<any>) => (props: any) => (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.screenBackground }} edges={['top']}>

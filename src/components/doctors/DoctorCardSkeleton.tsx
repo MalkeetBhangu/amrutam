@@ -28,31 +28,20 @@ const DoctorCardSkeleton: React.FC = () => {
     return (
         <View style={styles.cardContainer}>
             <View style={styles.topSection}>
-                {/* Avatar Skeleton */}
                 <Animated.View style={[styles.avatarSkeleton, { opacity: animatedValue }]} />
-
                 <View style={styles.infoColumn}>
-                    {/* Name & Rating Row */}
                     <View style={styles.nameRow}>
                         <Animated.View style={[styles.nameSkeleton, { opacity: animatedValue }]} />
                         <Animated.View style={[styles.ratingSkeleton, { opacity: animatedValue }]} />
                     </View>
-
-                    {/* Specialty Text Skeleton */}
                     <Animated.View style={[styles.specialtySkeleton, { opacity: animatedValue }]} />
-
-                    {/* Meta Row Skeleton */}
                     <Animated.View style={[styles.metaRowSkeleton, { opacity: animatedValue }]} />
                 </View>
             </View>
-
-            {/* Slots Info Boxes Row */}
             <View style={styles.slotsRow}>
                 <Animated.View style={[styles.infoBoxSkeleton, { opacity: animatedValue }]} />
                 <Animated.View style={[styles.infoBoxSkeleton, { opacity: animatedValue }]} />
             </View>
-
-            {/* Book Button Skeleton */}
             <Animated.View style={[styles.buttonSkeleton, { opacity: animatedValue }]} />
         </View>
     )

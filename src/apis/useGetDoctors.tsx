@@ -1,10 +1,13 @@
+import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { QUERY_KEYS } from './ApiConstants'
-import { GetDoctorsResponse, Doctor } from 'src/types/DoctorTypes'
+import { GetDoctorsResponse, Doctor, BookingItem } from 'src/types/DoctorTypes'
+import { useUserState } from '@src/store/UseUserStore'
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL
 
 export interface FetchDoctorsParams {
+    userId: string
     pageParam?: number
     search?: string
     expertise?: string[]
@@ -16,6 +19,7 @@ export interface FetchDoctorsParams {
 
 export const buildDoctorsQueryParams = (filters: FetchDoctorsParams): URLSearchParams => {
     const params = new URLSearchParams()
+    params.append('userId', filters.userId)
     params.append('page', String(filters.pageParam || 1))
     params.append('limit', '20')
 
@@ -48,6 +52,7 @@ export const fetchDoctors = async (filterParams: FetchDoctorsParams): Promise<Ge
 
     const response = await fetch(url)
     const data = await response.json()
+    console.log("j", JSON.stringify(data, null, 2))
     return data
 }
 
@@ -61,7 +66,8 @@ export interface UseGetDoctorsOptions {
 }
 
 export const useGetDoctors = (filters?: UseGetDoctorsOptions) => {
-    const queryResult = useInfiniteQuery<GetDoctorsResponse, Error, Doctor[]>({
+    const { userData: { userId } } = useUserState(['userId'])
+    const queryResult = useInfiniteQuery<GetDoctorsResponse, Error>({
         queryKey: [
             QUERY_KEYS.DOCTORS,
             {
@@ -82,7 +88,9 @@ export const useGetDoctors = (filters?: UseGetDoctorsOptions) => {
                 language: filters?.language,
                 minConsultationFee: filters?.minConsultationFee,
                 maxConsultationFee: filters?.maxConsultationFee,
+                userId: userId || ''
             }),
+        enabled: !!userId,
         initialPageParam: 1,
         getNextPageParam: (lastPage) => {
             const pagination = lastPage?.pagination
@@ -91,12 +99,20 @@ export const useGetDoctors = (filters?: UseGetDoctorsOptions) => {
             }
             return undefined
         },
-        select: (data) => data.pages.flatMap((page) => page.data || []),
         staleTime: 1000 * 60 * 60,
     })
 
+    const doctors: Doctor[] = useMemo(
+        () => queryResult.data?.pages.flatMap((page) => page.data || []) || [],
+        [queryResult.data]
+    )
+
+    const upcomingConsultation: BookingItem | null =
+        queryResult.data?.pages?.[0]?.upcomingConsultation ?? null
+
     return {
         ...queryResult,
-        doctors: queryResult.data || [],
+        doctors,
+        upcomingConsultation,
     }
 }

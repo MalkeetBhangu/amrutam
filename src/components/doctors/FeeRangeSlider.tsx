@@ -1,10 +1,11 @@
 import React, { useState, useRef, useMemo } from 'react'
-import { StyleSheet, View, PanResponder, LayoutChangeEvent } from 'react-native'
+import { StyleSheet, View, PanResponder, LayoutChangeEvent, DimensionValue } from 'react-native'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
 import { getTexts } from 'src/translations/TranslationHelper'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface FeeRangeSliderProps {
     minFee?: number
@@ -13,15 +14,10 @@ export interface FeeRangeSliderProps {
     maxLimit?: number
 }
 
-const FeeRangeSlider: React.FC<FeeRangeSliderProps> = ({
-    minFee = 0,
-    maxFee,
-    onFeeChange,
-    maxLimit = 2000,
-}) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
-    const filterTranslations = (t.doctors as any)?.filterModal || {}
-
+const FeeRangeSlider: React.FC<FeeRangeSliderProps> = ({ minFee = 0, maxFee, onFeeChange, maxLimit = 2000, }) => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
+    const filterTranslations = t.doctors?.filterModal || {}
     const [trackWidth, setTrackWidth] = useState<number>(300)
     const trackRef = useRef<View>(null)
 
@@ -65,7 +61,7 @@ const FeeRangeSlider: React.FC<FeeRangeSliderProps> = ({
     return (
         <View style={styles.sectionContainer}>
             <View style={styles.feeTitleRow}>
-                <TextView text={filterTranslations.consultationFee || 'Consultation Fee'} style={styles.sectionTitle} />
+                <TextView text={filterTranslations.consultationFee} style={styles.sectionTitle} />
                 <TextView text={`₹${minFee} - ₹${maxFee}+`} style={styles.feeValueText} />
             </View>
 
@@ -76,13 +72,13 @@ const FeeRangeSlider: React.FC<FeeRangeSliderProps> = ({
                 {...panResponder.panHandlers}
             >
                 <View style={styles.sliderBackgroundTrack} />
-                <View style={[styles.sliderActiveTrack, { width: `${(maxFee / maxLimit) * 100}%` as any }]} />
+                <View style={[styles.sliderActiveTrack, { width: `${(maxFee / maxLimit) * 100}%` }]} />
                 <View style={styles.sliderHandleLeft} />
-                <View style={[styles.sliderHandleRight, { left: rightHandlePosition as any }]} />
+                <View style={[styles.sliderHandleRight, { left: rightHandlePosition as DimensionValue }]} />
             </View>
 
             <View style={styles.feeLabelRow}>
-                <TextView text={filterTranslations.free || 'Free'} style={styles.feeMinMaxText} />
+                <TextView text={filterTranslations.free} style={styles.feeMinMaxText} />
                 <TextView text={`₹${maxLimit}+`} style={styles.feeMinMaxText} />
             </View>
         </View>
@@ -135,7 +131,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: colors.darkGreen,
         elevation: 2,
-        shadowColor: '#000',
+        shadowColor: colors.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 2,
@@ -149,7 +145,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: colors.darkGreen,
         elevation: 2,
-        shadowColor: '#000',
+        shadowColor: colors.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 2,

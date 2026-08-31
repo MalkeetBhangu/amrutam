@@ -20,8 +20,6 @@ export interface Doctor {
     verified: boolean
     consultationDuration: number
     hasBooking?: boolean
-    hasBookings?: boolean
-    slots: DoctorSlot[]
 }
 
 export interface PaginationInfo {
@@ -30,11 +28,13 @@ export interface PaginationInfo {
     total: number
     totalPages: number
     hasNextPage: boolean
+    hasPreviousPage?: boolean
 }
 
 export interface GetDoctorsResponse {
     success: boolean
     data: Doctor[]
+    upcomingConsultation: BookingItem | null
     pagination?: PaginationInfo
 }
 
@@ -53,6 +53,8 @@ export interface DateSlotGroup {
 export interface BookingItem {
     doctorId: string
     doctorName?: string
+    doctorImage?: string
+    specialization?: string
     date: string
     slot: {
         id: string

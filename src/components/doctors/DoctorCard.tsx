@@ -9,92 +9,82 @@ import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
 import { useNavigation } from '@react-navigation/native'
 import { Screens } from '@src/constants/Screens'
+import { useUserState } from '@src/store/UseUserStore'
+import { Doctor } from '@src/types/DoctorTypes'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { ParamsList } from '@src/navigation/useNavigation'
+import { StackNavigationProp } from '@react-navigation/stack'
 
 export interface DoctorCardProps {
-    doctor: any
+    doctor: Doctor
 }
 
 const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
-    const cardTranslations = (t.doctors as any)?.card || {}
-    const navigation = useNavigation<any>()
-
-    const handlePressDoctor = () => {
-        navigation.navigate(Screens.DOCTOR_DETAILS, { doctor })
-    }
-
-    const rawImage = doctor?.image || doctor?.imageUri
-    const imageSource = rawImage
-        ? typeof rawImage === 'string'
-            ? { uri: rawImage }
-            : rawImage
-        : { uri: DEFAULT_AVATAR }
-
-    const isVerified = doctor?.verified ?? doctor?.isVerified ?? true
-    const specialtyText = doctor?.specialization || doctor?.specialty || ''
-    const experienceYears = doctor?.experience ?? doctor?.experienceYears ?? 0
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
+    const cardTranslations = t?.doctors?.card ?? {}
+    const navigation = useNavigation<StackNavigationProp<ParamsList, Screens.DOCTOR_DETAILS>>()
+    const rawImage = doctor?.image
+    const imageSource = rawImage ? { uri: rawImage } : { uri: DEFAULT_AVATAR }
+    const isVerified = doctor?.verified ?? true
+    const specialtyText = doctor?.specialization ?? ''
+    const experienceYears = doctor?.experience ?? 0
     const ratingText = doctor?.rating != null ? Number(doctor.rating).toFixed(1) : '0.0'
     const languagesArray = Array.isArray(doctor?.languages) ? doctor.languages : (doctor?.languages ? [doctor.languages] : [])
     const languagesText = languagesArray.join(', ')
-
     const consultationFee = doctor?.consultationFee ?? 0
-    const nextSlotText = doctor?.slots?.[0]?.time ? `${cardTranslations.today}, ${doctor.slots[0].time}` : (doctor?.nextSlot || '')
+    const hasBooking = Boolean(doctor?.hasBooking)
+    const buttonTitle = hasBooking ? cardTranslations.myBookings : cardTranslations.bookSlot
 
-            const hasBooking = Boolean(doctor?.hasBooking ?? doctor?.hasBookings)
-            const buttonTitle = hasBooking ? 'My bookings' : (cardTranslations.bookSlot || 'Book an Appointment')
+    const handlePressDoctor = () => navigation.navigate(Screens.DOCTOR_DETAILS, { doctor })
 
-            return (
-                <Pressable style={styles.cardContainer} onPress={handlePressDoctor}>
-                    <View style={styles.topSection}>
-                        <View style={styles.avatarContainer}>
-                            <Image source={imageSource} style={styles.avatarImage} resizeMode="cover" />
-                            {isVerified && (
-                                <View style={styles.badgeWrapper}>
-                                    <VerifiedIcon width={getHeight(20)} height={getHeight(20)} />
-                                </View>
-                            )}
+    return (
+        <Pressable style={styles.cardContainer} onPress={handlePressDoctor}>
+            <View style={styles.topSection}>
+                <View style={styles.avatarContainer}>
+                    <Image source={imageSource} style={styles.avatarImage} resizeMode="cover" />
+                    {isVerified && (
+                        <View style={styles.badgeWrapper}>
+                            <VerifiedIcon width={getHeight(20)} height={getHeight(20)} />
                         </View>
+                    )}
+                </View>
 
-                        <View style={styles.infoColumn}>
-                            <View style={styles.nameRow}>
-                                <TextView text={doctor?.name || ''} style={styles.doctorName} numberOfLines={1} />
-                                <View style={styles.ratingBadge}>
-                                    <StarIcon width={getHeight(12)} height={getHeight(12)} />
-                                    <TextView text={ratingText} style={styles.ratingText} />
-                                </View>
-                            </View>
-
-                            <TextView text={specialtyText} style={styles.specialtyText} numberOfLines={1} />
-
-                            <View style={styles.metaRow}>
-                                <View style={styles.metaItem}>
-                                    <BriefcaseIcon width={getHeight(14)} height={getHeight(14)} />
-                                    <TextView text={`${experienceYears} ${cardTranslations.yearsExp}`} style={styles.metaText} />
-                                </View>
-
-                                <TextView text="•" style={styles.dotSeparator} />
-
-                                <View style={styles.languagesContainer}>
-                                    <GlobeIcon width={getHeight(14)} height={getHeight(14)} />
-                                    <TextView text={languagesText} style={styles.languagesText} numberOfLines={2} />
-                                </View>
-                            </View>
+                <View style={styles.infoColumn}>
+                    <View style={styles.nameRow}>
+                        <TextView text={doctor?.name || ''} style={styles.doctorName} numberOfLines={1} />
+                        <View style={styles.ratingBadge}>
+                            <StarIcon width={getHeight(12)} height={getHeight(12)} />
+                            <TextView text={ratingText} style={styles.ratingText} />
                         </View>
                     </View>
 
-                    <View style={styles.consultationContainer}>
-                        <TextView text={cardTranslations.consultation || 'Consultation'} style={styles.boxLabel} />
-                        <TextView text={`₹${consultationFee}`} style={styles.boxValueDark} />
-                    </View>
+                    <TextView text={specialtyText} style={styles.specialtyText} numberOfLines={1} />
 
-                    <Button
-                        title={buttonTitle}
-                        onPress={handlePressDoctor}
-                        variant="primary"
-                        style={styles.bookButton}
-                    />
-                </Pressable>
-            )
+                    <View style={styles.metaRow}>
+                        <View style={styles.metaItem}>
+                            <BriefcaseIcon width={getHeight(14)} height={getHeight(14)} />
+                            <TextView text={`${experienceYears} ${cardTranslations.yearsExp}`} style={styles.metaText} />
+                        </View>
+
+                        <TextView text="•" style={styles.dotSeparator} />
+
+                        <View style={styles.languagesContainer}>
+                            <GlobeIcon width={getHeight(14)} height={getHeight(14)} />
+                            <TextView text={languagesText} style={styles.languagesText} numberOfLines={2} />
+                        </View>
+                    </View>
+                </View>
+            </View>
+
+            <View style={styles.consultationContainer}>
+                <TextView text={cardTranslations.consultation} style={styles.boxLabel} />
+                <TextView text={`₹${consultationFee}`} style={styles.boxValueDark} />
+            </View>
+
+            <Button title={buttonTitle} onPress={handlePressDoctor} variant="primary" style={styles.bookButton} />
+        </Pressable>
+    )
 }
 
 const styles = StyleSheet.create({

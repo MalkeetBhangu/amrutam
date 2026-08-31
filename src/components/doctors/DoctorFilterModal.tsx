@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { StyleSheet, View, Modal, Pressable, ScrollView } from 'react-native'
 import { cross as CrossIcon } from 'assets'
 import colors from 'src/tokens/Colors'
@@ -7,7 +7,9 @@ import Button from 'src/components/sharedComponents/Button'
 import { getTexts } from 'src/translations/TranslationHelper'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
+import useGetFilterListing from 'src/apis/useGetFilterListing'
 import FeeRangeSlider from './FeeRangeSlider'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface FilterState {
     expertise: string[]
@@ -16,154 +18,148 @@ export interface FilterState {
     maxFee: number
 }
 
-export interface DoctorFilterModalProps {
-    visible: boolean
-    onClose: () => void
-    onApply?: (filters: FilterState) => void
-    initialFilters?: FilterState
-    expertiseOptions?: string[]
-    languageOptions?: string[]
+export interface DoctorFilterModalRef {
+    open: () => void
+    close: () => void
 }
 
-const GENDER_OPTIONS = ['Male', 'Female', 'Other']
+export interface DoctorFilterModalProps {
+    activeFilters?: FilterState
+    onApplyFilters: (filters: FilterState | undefined) => void
+}
 
-const DoctorFilterModal: React.FC<DoctorFilterModalProps> = ({ visible, onClose, onApply, initialFilters, expertiseOptions, languageOptions, }) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
-    const filterTranslations = (t.doctors as any)?.filterModal || {}
-    const [selectedExpertise, setSelectedExpertise] = useState<string[]>(initialFilters?.expertise || [])
-    const [selectedLanguages, setSelectedLanguages] = useState<string[]>(initialFilters?.languages || [])
-    const [selectedGender, setSelectedGender] = useState<string>(initialFilters?.gender || '')
-    const [maxFee, setMaxFee] = useState<number>(initialFilters?.maxFee || 2000)
+const DoctorFilterModal = forwardRef<DoctorFilterModalRef, DoctorFilterModalProps>(
+    ({ activeFilters, onApplyFilters }, ref) => {
+        const { userData: { languageCode } } = useUserState(['languageCode'])
+        const [visible, setVisible] = useState(false)
+        const t = getTexts(languageCode ?? DEFAULT_LANGUAGE_CODE)
+        const filterTranslations = t.doctors?.filterModal || {}
+        const { data: filterListingData } = useGetFilterListing('doctors')
+        const [selectedExpertise, setSelectedExpertise] = useState<string[]>(activeFilters?.expertise || [])
+        const [selectedLanguages, setSelectedLanguages] = useState<string[]>(activeFilters?.languages || [])
+        const [selectedGender, setSelectedGender] = useState<string>(activeFilters?.gender || '')
+        const [maxFee, setMaxFee] = useState<number>(activeFilters?.maxFee || 2000)
 
-    useEffect(() => {
-        if (visible) {
-            setSelectedExpertise(initialFilters?.expertise || [])
-            setSelectedLanguages(initialFilters?.languages || [])
-            setSelectedGender(initialFilters?.gender || '')
-            setMaxFee(initialFilters?.maxFee || 2000)
+        useImperativeHandle(ref, () => ({
+            open: () => setVisible(true),
+            close: () => setVisible(false),
+        }))
+
+        useEffect(() => {
+            if (visible) {
+                setSelectedExpertise(activeFilters?.expertise || [])
+                setSelectedLanguages(activeFilters?.languages || [])
+                setSelectedGender(activeFilters?.gender || '')
+                setMaxFee(activeFilters?.maxFee || 2000)
+            }
+        }, [visible, activeFilters])
+
+        const toggleExpertise = (item: string) => setSelectedExpertise((prev) => prev.includes(item) ? prev.filter((e) => e !== item) : [...prev, item])
+
+        const toggleLanguage = (item: string) => setSelectedLanguages((prev) => prev.includes(item) ? prev.filter((l) => l !== item) : [...prev, item])
+
+        const handleClose = () => setVisible(false)
+
+        const handleClearAll = () => {
+            setSelectedExpertise([])
+            setSelectedLanguages([])
+            setSelectedGender('')
+            setMaxFee(2000)
+            onApplyFilters(undefined)
+            setVisible(false)
         }
-    }, [visible, initialFilters])
 
-    const toggleExpertise = (item: string) => {
-        setSelectedExpertise((prev) =>
-            prev.includes(item) ? prev.filter((e) => e !== item) : [...prev, item]
-        )
-    }
-
-    const toggleLanguage = (item: string) => {
-        setSelectedLanguages((prev) =>
-            prev.includes(item) ? prev.filter((l) => l !== item) : [...prev, item]
-        )
-    }
-
-    const handleClearAll = () => {
-        const clearedFilters: FilterState = {
-            expertise: [],
-            languages: [],
-            gender: '',
-            maxFee: 2000,
+        const handleApply = () => {
+            const isEmpty = selectedExpertise.length === 0 && selectedLanguages.length === 0 && !selectedGender && maxFee >= 2000
+            if (isEmpty) onApplyFilters(undefined)
+            else onApplyFilters({ expertise: selectedExpertise, languages: selectedLanguages, gender: selectedGender, maxFee })
+            setVisible(false)
         }
-        setSelectedExpertise([])
-        setSelectedLanguages([])
-        setSelectedGender('')
-        setMaxFee(2000)
-        onApply?.(clearedFilters)
-        onClose()
-    }
 
-    const handleApply = () => {
-        onApply?.({
-            expertise: selectedExpertise,
-            languages: selectedLanguages,
-            gender: selectedGender,
-            maxFee,
-        })
-        onClose()
-    }
+        return (
+            <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
+                <View style={styles.overlay}>
+                    <Pressable style={styles.backdropPressable} onPress={handleClose} />
 
-    return (
-        <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose} >
-            <View style={styles.overlay}>
-                <Pressable style={styles.backdropPressable} onPress={onClose} />
-
-                <View style={styles.sheetContainer}>
-                    <View style={styles.handleContainer}>
-                        <View style={styles.handlePill} />
-                    </View>
-
-                    <View style={styles.headerRow}>
-                        <Pressable onPress={onClose} style={styles.closeButton} hitSlop={8}>
-                            <CrossIcon width={getHeight(18)} height={getHeight(18)} />
-                        </Pressable>
-                        <TextView text={filterTranslations.title} style={styles.headerTitle} />
-                        <Pressable onPress={handleClearAll} hitSlop={8}>
-                            <TextView text={filterTranslations.clearAll} style={styles.clearAllText} />
-                        </Pressable>
-                    </View>
-
-                    <View style={styles.divider} />
-
-                    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" >
-                        <View style={styles.sectionContainer}>
-                            <TextView text={filterTranslations.expertise} style={styles.sectionTitle} />
-                            <View style={styles.chipRow}>
-                                {expertiseOptions?.map((item) => {
-                                    const isSelected = selectedExpertise.includes(item)
-                                    return (
-                                        <Pressable key={item} onPress={() => toggleExpertise(item)} style={[styles.chip, isSelected && styles.selectedChip]}>
-                                            <TextView text={item} style={[styles.chipText, isSelected && styles.selectedChipText]} />
-                                        </Pressable>
-                                    )
-                                })}
-                            </View>
+                    <View style={styles.sheetContainer}>
+                        <View style={styles.handleContainer}>
+                            <View style={styles.handlePill} />
                         </View>
 
-                        <View style={styles.sectionContainer}>
-                            <TextView text={filterTranslations.language} style={styles.sectionTitle} />
-                            <View style={styles.chipRow}>
-                                {languageOptions?.map((item) => {
-                                    const isSelected = selectedLanguages.includes(item)
-                                    return (
-                                        <Pressable key={item} onPress={() => toggleLanguage(item)} style={[styles.chip, isSelected && styles.selectedChip]}>
-                                            <TextView text={item} style={[styles.chipText, isSelected && styles.selectedChipText]} />
-                                        </Pressable>
-                                    )
-                                })}
-                            </View>
+                        <View style={styles.headerRow}>
+                            <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={8}>
+                                <CrossIcon width={getHeight(18)} height={getHeight(18)} />
+                            </Pressable>
+                            <TextView text={filterTranslations.title} style={styles.headerTitle} />
+                            <Pressable onPress={handleClearAll} hitSlop={8}>
+                                <TextView text={filterTranslations.clearAll} style={styles.clearAllText} />
+                            </Pressable>
                         </View>
 
-                        <View style={styles.sectionContainer}>
-                            <TextView text={filterTranslations.gender} style={styles.sectionTitle} />
-                            <View style={styles.chipRow}>
-                                {GENDER_OPTIONS.map((item) => {
-                                    const isSelected = selectedGender === item
-                                    return (
-                                        <Pressable key={item} onPress={() => setSelectedGender(isSelected ? '' : item)} style={[styles.chip, isSelected && styles.selectedChip]}>
-                                            <TextView text={item} style={[styles.chipText, isSelected && styles.selectedChipText]} />
-                                        </Pressable>
-                                    )
-                                })}
+                        <View style={styles.divider} />
+
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" >
+                            <View style={styles.sectionContainer}>
+                                <TextView text={filterTranslations.expertise} style={styles.sectionTitle} />
+                                <View style={styles.chipRow}>
+                                    {filterListingData?.data?.expertise?.map((item) => {
+                                        const isSelected = selectedExpertise.includes(item)
+                                        return (
+                                            <Pressable key={item} onPress={() => toggleExpertise(item)} style={[styles.chip, isSelected && styles.selectedChip]}>
+                                                <TextView text={item} style={[styles.chipText, isSelected && styles.selectedChipText]} />
+                                            </Pressable>
+                                        )
+                                    })}
+                                </View>
                             </View>
+
+                            <View style={styles.sectionContainer}>
+                                <TextView text={filterTranslations.language} style={styles.sectionTitle} />
+                                <View style={styles.chipRow}>
+                                    {filterListingData?.data?.languages?.map((item) => {
+                                        const isSelected = selectedLanguages.includes(item)
+                                        return (
+                                            <Pressable key={item} onPress={() => toggleLanguage(item)} style={[styles.chip, isSelected && styles.selectedChip]}>
+                                                <TextView text={item} style={[styles.chipText, isSelected && styles.selectedChipText]} />
+                                            </Pressable>
+                                        )
+                                    })}
+                                </View>
+                            </View>
+
+                            <View style={styles.sectionContainer}>
+                                <TextView text={filterTranslations.gender} style={styles.sectionTitle} />
+                                <View style={styles.chipRow}>
+                                    {filterListingData?.data?.gender?.map((item) => {
+                                        const isSelected = selectedGender === item
+                                        return (
+                                            <Pressable key={item} onPress={() => setSelectedGender(isSelected ? '' : item)} style={[styles.chip, isSelected && styles.selectedChip]}>
+                                                <TextView text={item} style={[styles.chipText, isSelected && styles.selectedChipText]} />
+                                            </Pressable>
+                                        )
+                                    })}
+                                </View>
+                            </View>
+
+                            <FeeRangeSlider maxFee={maxFee} onFeeChange={setMaxFee} />
+                        </ScrollView>
+
+                        <View style={styles.divider} />
+
+                        <View style={styles.bottomBar}>
+                            <Button
+                                title={filterTranslations.apply}
+                                onPress={handleApply}
+                                variant="primary"
+                                borderRadius={getHeight(16)}
+                            />
                         </View>
-
-                        <FeeRangeSlider maxFee={maxFee} onFeeChange={setMaxFee} />
-                    </ScrollView>
-
-                    <View style={styles.divider} />
-
-                    <View style={styles.bottomBar}>
-                        <Button
-                            title={filterTranslations.apply}
-                            onPress={handleApply}
-                            variant="primary"
-                            borderRadius={getHeight(16)}
-                        />
                     </View>
                 </View>
-            </View>
-        </Modal>
-    )
-}
+            </Modal>
+        )
+    })
+
 
 const styles = StyleSheet.create({
     overlay: {

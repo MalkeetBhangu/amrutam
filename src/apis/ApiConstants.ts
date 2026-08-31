@@ -6,6 +6,7 @@ export enum QUERY_KEYS {
     PRODUCTS = 'PRODUCTS',
     CART = 'CART',
     WISHLIST = 'WISHLIST',
-    USER = 'USER'
+    USER = 'USER',
+    FILTER_LISTING = 'FILTER_LISTING',
 }
 

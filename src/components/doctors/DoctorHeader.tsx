@@ -9,26 +9,20 @@ import TextInput from '@src/components/sharedComponents/TextInput'
 import TextView from '@src/components/sharedComponents/TextView'
 
 import UpcomingConsultationCard from './UpcomingConsultationCard'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface DoctorHeaderProps {
     onFilterPress?: () => void
     searchQuery?: string
     onSearchChange?: (text: string) => void
     upcomingBooking?: any
-    allBookings?: any[]
 }
 
-const DoctorHeader: React.FC<DoctorHeaderProps> = ({
-    onFilterPress,
-    searchQuery: externalSearchQuery,
-    onSearchChange,
-    upcomingBooking,
-    allBookings,
-}) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
+const DoctorHeader: React.FC<DoctorHeaderProps> = ({ onFilterPress, searchQuery: externalSearchQuery, onSearchChange, upcomingBooking, }) => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
     const [internalSearchQuery, setInternalSearchQuery] = useState('')
-
-    const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery
+    const searchQuery = externalSearchQuery ?? internalSearchQuery
     const handleSearchChange = (text: string) => {
         if (onSearchChange) {
             onSearchChange(text)
@@ -49,7 +43,7 @@ const DoctorHeader: React.FC<DoctorHeaderProps> = ({
                 </Pressable>
             </View>
 
-            {Boolean(upcomingBooking) && <UpcomingConsultationCard booking={upcomingBooking} allBookings={allBookings} />}
+            {upcomingBooking && <UpcomingConsultationCard booking={upcomingBooking} />}
 
             <View style={styles.titleSection}>
                 <TextView style={styles.titleText} text={t.doctors.findDoctorTitle} />

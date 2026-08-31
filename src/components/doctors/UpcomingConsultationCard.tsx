@@ -7,13 +7,15 @@ import { getHeight } from 'src/libs/StyleHelper'
 import { calender as CalendarIcon } from 'assets'
 import { Screens } from '@src/constants/Screens'
 import { BookingItem } from 'src/types/DoctorTypes'
+import { useUserState } from '@src/store/UseUserStore'
+import { getTexts } from 'src/translations/TranslationHelper'
+import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 
 export interface UpcomingConsultationCardProps {
     booking: BookingItem | any
-    allBookings?: any[]
 }
 
-const formatBookingBadge = (dateStr: string, timeStr: string): string => {
+const formatBookingBadge = (dateStr: string, timeStr: string, todayText: string, tomorrowText: string): string => {
     let dateFormatted = ''
     if (dateStr) {
         const parts = dateStr.split('-')
@@ -30,9 +32,9 @@ const formatBookingBadge = (dateStr: string, timeStr: string): string => {
             const diffDays = Math.round(diffTime / (1000 * 3600 * 24))
 
             if (diffDays === 0) {
-                dateFormatted = 'Today'
+                dateFormatted = todayText
             } else if (diffDays === 1) {
-                dateFormatted = 'Tomorrow'
+                dateFormatted = tomorrowText
             } else {
                 const dayOfWeek = target.toLocaleDateString('en-US', { weekday: 'short' })
                 const monthName = target.toLocaleDateString('en-US', { month: 'short' })
@@ -67,7 +69,10 @@ const formatBookingBadge = (dateStr: string, timeStr: string): string => {
     return dateFormatted || timeFormatted
 }
 
-const UpcomingConsultationCard: React.FC<UpcomingConsultationCardProps> = ({ booking, allBookings }) => {
+const UpcomingConsultationCard: React.FC<UpcomingConsultationCardProps> = ({ booking }) => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
+    const upcomingTranslations = t.doctors?.upcomingConsultation || {}
     const navigation = useNavigation<any>()
 
     if (!booking) return null
@@ -82,7 +87,7 @@ const UpcomingConsultationCard: React.FC<UpcomingConsultationCardProps> = ({ boo
         return null
     }
 
-    const doctorName = booking.doctorName || booking.doctor?.name || 'Dr. Doctor'
+    const doctorName = booking.doctorName || booking.doctor?.name || ''
     const specialtyText =
         booking.specialization ||
         booking.specialty ||
@@ -91,19 +96,23 @@ const UpcomingConsultationCard: React.FC<UpcomingConsultationCardProps> = ({ boo
         booking.doctor?.specialization ||
         booking.doctor?.specialty ||
         booking.doctor?.expertise?.[0] ||
-        booking.doctor?.category
+        booking.doctor?.category ||
+        ''
     const dateStr = booking.date || ''
     const timeStr = booking.slot?.startTime || booking.slot?.time || booking.startTime || ''
-    const badgeText = formatBookingBadge(dateStr, timeStr)
+    const badgeText = formatBookingBadge(
+        dateStr,
+        timeStr,
+        upcomingTranslations.today,
+        upcomingTranslations.tomorrow
+    )
 
-    const handleViewDetails = () => {
-        const bookingsList = allBookings && allBookings.length > 0 ? allBookings : [booking]
-        navigation.navigate(Screens.BOOKINGS, { bookings: bookingsList })
-    }
+    const handleViewDetails = () => navigation.navigate(Screens.BOOKINGS)
+
 
     return (
         <View style={styles.sectionContainer}>
-            <TextView text="Upcoming Consultation" style={styles.sectionTitle} />
+            <TextView text={upcomingTranslations.title} style={styles.sectionTitle} />
 
             <View style={styles.cardContainer}>
                 <View style={styles.topRow}>
@@ -121,7 +130,7 @@ const UpcomingConsultationCard: React.FC<UpcomingConsultationCardProps> = ({ boo
                 </View>
 
                 <Pressable style={styles.viewDetailsButton} onPress={handleViewDetails}>
-                    <TextView text="View Details" style={styles.buttonText} />
+                    <TextView text={upcomingTranslations.viewDetails} style={styles.buttonText} />
                 </Pressable>
             </View>
         </View>
@@ -140,7 +149,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     cardContainer: {
-        backgroundColor: colors.chipBg || '#ECE8DF',
+        backgroundColor: colors.chipBg,
         borderRadius: getHeight(20),
         padding: 16,
     },

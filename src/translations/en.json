@@ -13,6 +13,12 @@
             "findDoctorTitle": "Find your Ayurvedic doctor",
             "findDoctorSubtitle": "Expert consultations tailored to your unique dosha.",
             "searchPlaceholder": "Search by name or specialty",
+            "upcomingConsultation": {
+                "title": "Upcoming Consultation",
+                "viewDetails": "View Details",
+                "today": "Today",
+                "tomorrow": "Tomorrow"
+            },
             "categories": {
                 "all": "All",
                 "skin": "Skin",
@@ -25,6 +31,7 @@
                 "consultation": "Consultation",
                 "nextSlot": "Next Slot",
                 "bookSlot": "Book an Appointment",
+                "myBookings": "My bookings",
                 "yearsExp": "Years Exp.",
                 "today": "Today"
             },
