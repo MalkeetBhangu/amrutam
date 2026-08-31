@@ -34,4 +34,4 @@ export { default as share } from './images/ShareIcon.svg'
 export { default as whiteBack } from './images/WhiteBack.svg'
 export { default as consultant } from './images/Consultant.svg'
 export { default as shopIcon } from './images/ShopIcon.svg'
-
+export { default as churna } from './images/Churna.png'

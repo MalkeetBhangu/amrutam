@@ -30,22 +30,12 @@ const ProductCardSkeleton: React.FC = () => {
 
     return (
         <View style={styles.cardContainer}>
-            {/* Image Skeleton Placeholder */}
             <Animated.View style={[styles.imageSkeleton, { opacity: animatedValue }]} />
-
-            {/* Details Skeleton */}
             <View style={styles.detailsContainer}>
-                {/* Rating Skeleton */}
                 <Animated.View style={[styles.ratingSkeleton, { opacity: animatedValue }]} />
-
-                {/* Name Skeleton (Line 1 & Line 2) */}
                 <Animated.View style={[styles.nameSkeletonLine1, { opacity: animatedValue }]} />
                 <Animated.View style={[styles.nameSkeletonLine2, { opacity: animatedValue }]} />
-
-                {/* Subtitle Skeleton */}
                 <Animated.View style={[styles.subtitleSkeleton, { opacity: animatedValue }]} />
-
-                {/* Bottom Row Skeleton (Price + Add Button) */}
                 <View style={styles.bottomRow}>
                     <Animated.View style={[styles.priceSkeleton, { opacity: animatedValue }]} />
                     <Animated.View style={[styles.buttonSkeleton, { opacity: animatedValue }]} />
@@ -63,7 +53,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: '#EFEFEF',
+        borderColor: colors.cardBorder,
         elevation: 2,
         shadowColor: colors.black,
         shadowOffset: { width: 0, height: 2 },
@@ -73,7 +63,7 @@ const styles = StyleSheet.create({
     imageSkeleton: {
         width: '100%',
         height: getHeight(150),
-        backgroundColor: colors.skeletonBg || '#EFEFEF',
+        backgroundColor: colors.skeletonBg,
     },
     detailsContainer: {
         padding: 12,
@@ -82,28 +72,28 @@ const styles = StyleSheet.create({
         width: getHeight(42),
         height: getHeight(14),
         borderRadius: 4,
-        backgroundColor: colors.skeletonBg || '#EFEFEF',
+        backgroundColor: colors.skeletonBg,
         marginBottom: 8,
     },
     nameSkeletonLine1: {
         width: '90%',
         height: getHeight(14),
         borderRadius: 4,
-        backgroundColor: colors.skeletonBg || '#EFEFEF',
+        backgroundColor: colors.skeletonBg,
         marginBottom: 4,
     },
     nameSkeletonLine2: {
         width: '65%',
         height: getHeight(14),
         borderRadius: 4,
-        backgroundColor: colors.skeletonBg || '#EFEFEF',
+        backgroundColor: colors.skeletonBg,
         marginBottom: 8,
     },
     subtitleSkeleton: {
         width: '50%',
         height: getHeight(12),
         borderRadius: 4,
-        backgroundColor: colors.skeletonBg || '#EFEFEF',
+        backgroundColor: colors.skeletonBg,
         marginBottom: 12,
     },
     bottomRow: {
@@ -116,13 +106,13 @@ const styles = StyleSheet.create({
         width: getHeight(55),
         height: getHeight(18),
         borderRadius: 4,
-        backgroundColor: colors.skeletonBg || '#EFEFEF',
+        backgroundColor: colors.skeletonBg,
     },
     buttonSkeleton: {
         width: getHeight(32),
         height: getHeight(32),
         borderRadius: getHeight(16),
-        backgroundColor: colors.skeletonBg || '#EFEFEF',
+        backgroundColor: colors.skeletonBg,
     },
 })
 

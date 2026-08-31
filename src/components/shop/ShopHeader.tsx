@@ -4,7 +4,9 @@ import { logo, search as SearchIcon, filter as FilterIcon } from 'assets'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
 import { getHeight } from 'src/libs/StyleHelper'
-import { DEFAULT_AVATAR } from 'src/constants/Constants'
+import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { getTexts } from 'src/translations/TranslationHelper'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface ShopHeaderProps {
     searchQuery: string
@@ -12,39 +14,34 @@ export interface ShopHeaderProps {
     onOpenFilter?: () => void
 }
 
-const ShopHeader: React.FC<ShopHeaderProps> = ({
-    searchQuery,
-    onChangeSearchQuery,
-    onOpenFilter,
-}) => {
+const ShopHeader: React.FC<ShopHeaderProps> = ({ searchQuery, onChangeSearchQuery, onOpenFilter, }) => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
+    const shopTexts = t.shop
+
     return (
         <View style={styles.container}>
-            {/* Top Bar: Logo & Brand + User Profile */}
             <View style={styles.topBar}>
                 <View style={styles.logoRow}>
                     <Image source={logo} style={styles.logoImage} resizeMode="contain" />
-                    <TextView text="AMRUTAM" style={styles.brandTitle} />
+                    <TextView text={shopTexts?.logoText?.toUpperCase()} style={styles.brandTitle} />
                 </View>
-
                 <View style={styles.rightHeaderRow}>
-                    <TextView text="Shop Main" style={styles.pageTitle} />
+                    <TextView text={shopTexts?.pageTitle} style={styles.pageTitle} />
                     <View style={styles.avatarWrapper}>
                         <Image source={{ uri: DEFAULT_AVATAR }} style={styles.avatarImage} />
                     </View>
                 </View>
             </View>
+            <TextView text={shopTexts?.mainTitle} style={styles.mainTitle} />
 
-            {/* Main Title */}
-            <TextView text="Ayurvedic Essentials" style={styles.mainTitle} />
-
-            {/* Search Input & Filter Button */}
             <View style={styles.searchRow}>
                 <View style={styles.searchInputContainer}>
                     <SearchIcon width={getHeight(18)} height={getHeight(18)} color={colors.textSecondary} />
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Search remedies..."
-                        placeholderTextColor="#A0A0A0"
+                        placeholder={shopTexts?.searchPlaceholder}
+                        placeholderTextColor={colors.placeholderColor}
                         value={searchQuery}
                         onChangeText={onChangeSearchQuery}
                     />
@@ -121,7 +118,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F3F3F3',
+        backgroundColor: colors.searchBg,
         borderRadius: getHeight(14),
         paddingHorizontal: 14,
         height: getHeight(46),
@@ -138,7 +135,7 @@ const styles = StyleSheet.create({
         width: getHeight(46),
         height: getHeight(46),
         borderRadius: getHeight(14),
-        backgroundColor: '#F3F3F3',
+        backgroundColor: colors.searchBg,
         alignItems: 'center',
         justifyContent: 'center',
     },

@@ -8,6 +8,11 @@ export interface ConsultationFeeRange {
     max: number
 }
 
+export interface PriceRange {
+    min: number
+    max: number
+}
+
 export interface DoctorFilterListingData {
     expertise: string[]
     languages: string[]
@@ -15,9 +20,20 @@ export interface DoctorFilterListingData {
     consultationFeeRange: ConsultationFeeRange
 }
 
+export interface SortByOption {
+    key: string
+    label: string
+}
+
+export interface ProductFilterListingData {
+    categories?: string[]
+    priceRange?: PriceRange
+    sortBy?: SortByOption[]
+}
+
 export interface FilterListingResponse {
     success: boolean
-    data: DoctorFilterListingData
+    data: DoctorFilterListingData & ProductFilterListingData
 }
 
 export const fetchFilterListing = async (
@@ -33,7 +49,9 @@ export const fetchFilterListing = async (
     return data
 }
 
-export const useGetFilterListing = (filterType: 'doctors' | 'products' = 'doctors') => {
+export const useGetFilterListing = (
+    filterType: 'doctors' | 'products' = 'doctors'
+) => {
     return useQuery<FilterListingResponse, Error>({
         queryKey: [QUERY_KEYS.FILTER_LISTING, filterType],
         queryFn: () => fetchFilterListing(filterType),

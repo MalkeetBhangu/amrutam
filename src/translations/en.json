@@ -111,6 +111,10 @@
             "moveAllToCart": "Move All to Cart"
         },
         "shop": {
+            "logoText": "Amrutam",
+            "pageTitle": "Shop Main",
+            "mainTitle": "Ayurvedic Essentials",
+            "searchPlaceholder": "Search remedies...",
             "filterModal": {
                 "title": "Filters",
                 "clearAll": "Clear All",
@@ -123,7 +127,8 @@
                 "searchCategories": "Search category by name...",
                 "priceRange": "Price Range",
                 "applyFilters": "Apply Filters"
-            }
+            },
+            "noProductsFound": "No products found"
         },
         "productDetail": {
             "title": "Product details",

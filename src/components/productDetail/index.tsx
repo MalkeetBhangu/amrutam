@@ -20,6 +20,7 @@ import {
     star as StarIcon,
     plus as PlusIcon,
     minus as MinusIcon,
+    churna as ChurnaImg,
 } from 'assets'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
@@ -32,13 +33,6 @@ import useAddToCart from '@src/apis/useAddToCart'
 import useAddToWishlist from '@src/apis/useAddToWishlist'
 import useRemoveFromWishlist from '@src/apis/useRemoveFromWishlist'
 import useGetWishlist from '@src/apis/useGetWishlist'
-
-const DEFAULT_PRODUCT_IMAGES = [
-    'https://images.unsplash.com/photo-1608248597263-00079e9653a9?w=800',
-    'https://images.unsplash.com/photo-1617897903246-719242758050?w=800',
-    'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800',
-    'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800',
-]
 
 const DEFAULT_TAGS = ['Organic', 'Ayurvedic', 'Vegan']
 
@@ -148,35 +142,7 @@ const ProductDetail: React.FC = () => {
     const originalPrice = Math.round(currentPrice * 1.33) // e.g. 799 for 599
     const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100) || 25
 
-    // Image URL resolution
-    const fallbackUri = DEFAULT_PRODUCT_IMAGES[
-        Math.abs(product.id?.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || 0) % DEFAULT_PRODUCT_IMAGES.length
-    ]
-
-    const resolveImageUrl = (urlStr?: string | null): string => {
-        if (!urlStr || typeof urlStr !== 'string' || urlStr.trim() === '') {
-            return fallbackUri
-        }
-        const trimmed = urlStr.trim()
-        if (
-            trimmed.includes('example.com') ||
-            trimmed.includes('via.placeholder.com') ||
-            trimmed.includes('placeholder.com') ||
-            trimmed.includes('invalid-url')
-        ) {
-            return fallbackUri
-        }
-        if (trimmed.includes('localhost') || trimmed.includes('127.0.0.1')) {
-            const baseUrl = process.env.EXPO_PUBLIC_BASE_URL || ''
-            const match = baseUrl.match(/^https?:\/\/[^\/]+/)
-            const host = match ? match[0] : 'http://10.0.2.2:3000'
-            return trimmed.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, host)
-        }
-        return trimmed
-    }
-
-    const resolvedUri = resolveImageUrl(product.image)
-    const imageSource = !imgError ? { uri: resolvedUri } : { uri: fallbackUri }
+    const imageSource = imgError || !product?.image ? ChurnaImg : { uri: product.image }
 
     const ratingVal = product.rating != null ? Number(product.rating).toFixed(1) : '4.8'
     const reviewsCount = product.reviewsCount || 1842

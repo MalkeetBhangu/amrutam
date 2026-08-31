@@ -16,7 +16,6 @@ const ShopCartFloatingButton: React.FC<ShopCartFloatingButtonProps> = ({ count =
             <Pressable style={styles.fabButton} onPress={onPress} hitSlop={6}>
                 <BagIcon width={getHeight(22)} height={getHeight(22)} color={colors.white} />
 
-                {/* Badge Circle Counter */}
                 {count > 0 && (
                     <View style={styles.badgeCircle}>
                         <TextView text={String(count)} style={styles.badgeText} />
@@ -52,7 +51,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -4,
         right: -4,
-        backgroundColor: '#D32F2F',
+        backgroundColor: colors.badgeRed,
         width: getHeight(20),
         height: getHeight(20),
         borderRadius: getHeight(10),

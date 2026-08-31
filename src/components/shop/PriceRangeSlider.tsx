@@ -1,6 +1,7 @@
 import React, { useRef, useState, useMemo, useEffect } from 'react'
-import { StyleSheet, View, Text, PanResponder, LayoutChangeEvent } from 'react-native'
+import { StyleSheet, View, PanResponder, LayoutChangeEvent } from 'react-native'
 import colors from 'src/tokens/Colors'
+import TextView from 'src/components/sharedComponents/TextView'
 import { getHeight } from 'src/libs/StyleHelper'
 
 export interface PriceRangeSliderProps {
@@ -14,19 +15,11 @@ export interface PriceRangeSliderProps {
 
 const THUMB_SIZE = getHeight(24)
 
-const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
-    min = 0,
-    max = 5000,
-    step = 100,
-    minValue,
-    maxValue,
-    onValueChange,
-}) => {
+const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({ min = 0, max = 5000, step = 100, minValue, maxValue, onValueChange, }) => {
     const [trackWidth, setTrackWidth] = useState<number>(300)
     const trackRef = useRef<View>(null)
     const activeThumbRef = useRef<'min' | 'max' | null>(null)
 
-    // Store latest values in refs to avoid stale closure issues in PanResponder
     const valuesRef = useRef({ minValue, maxValue, trackWidth, min, max, step })
     useEffect(() => {
         valuesRef.current = { minValue, maxValue, trackWidth, min, max, step }
@@ -61,7 +54,6 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
             const stepVal = valuesRef.current.step
 
             if (isGrant) {
-                // Determine which thumb is closer
                 const distToMin = Math.abs(clampedVal - currMin)
                 const distToMax = Math.abs(clampedVal - currMax)
                 activeThumbRef.current = distToMin <= distToMax ? 'min' : 'max'
@@ -114,10 +106,7 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
                 style={styles.sliderTrackContainer}
                 {...panResponder.panHandlers}
             >
-                {/* Background Track */}
                 <View style={styles.trackBackground} />
-
-                {/* Active Highlight Segment */}
                 <View
                     style={[
                         styles.activeTrack,
@@ -128,7 +117,6 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
                     ]}
                 />
 
-                {/* Min Thumb */}
                 <View
                     style={[
                         styles.thumb,
@@ -138,7 +126,6 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
                     ]}
                 />
 
-                {/* Max Thumb */}
                 <View
                     style={[
                         styles.thumb,
@@ -149,10 +136,9 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
                 />
             </View>
 
-            {/* Scale Labels */}
             <View style={styles.labelsRow}>
-                <Text style={styles.labelMin}>₹{min}</Text>
-                <Text style={styles.labelMax}>₹{max}+</Text>
+                <TextView text={`₹${min}`} style={styles.labelMin} />
+                <TextView text={`₹${max}+`} style={styles.labelMax} />
             </View>
         </View>
     )
@@ -170,7 +156,7 @@ const styles = StyleSheet.create({
     trackBackground: {
         height: 6,
         borderRadius: 3,
-        backgroundColor: colors.sliderTrackBg || '#E6EBE8',
+        backgroundColor: colors.sliderTrackBg,
         width: '100%',
     },
     activeTrack: {
@@ -187,7 +173,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderWidth: 3,
         borderColor: colors.darkGreen,
-        shadowColor: '#000',
+        shadowColor: colors.black,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 3,

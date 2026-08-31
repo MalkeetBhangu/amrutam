@@ -1,20 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import {
-    StyleSheet,
-    View,
-    Text,
-    Modal,
-    Pressable,
-    ScrollView,
-    Animated,
-    TouchableWithoutFeedback,
-} from 'react-native'
 import { cross as CrossIcon } from 'assets'
-import colors from 'src/tokens/Colors'
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react'
+import { Modal, Pressable, ScrollView, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
 import TextView from 'src/components/sharedComponents/TextView'
-import { getHeight } from 'src/libs/StyleHelper'
-import { getTexts } from 'src/translations/TranslationHelper'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { getHeight } from 'src/libs/StyleHelper'
+import colors from 'src/tokens/Colors'
+import { getTexts } from 'src/translations/TranslationHelper'
+import { useUserState } from '@src/store/UseUserStore'
+import useGetFilterListing from 'src/apis/useGetFilterListing'
 import PriceRangeSlider from './PriceRangeSlider'
 
 export interface FilterState {
@@ -24,245 +17,159 @@ export interface FilterState {
     maxPrice: number
 }
 
+export interface ProductFilterModalRef {
+    open: () => void
+    close: () => void
+}
+
 export interface ProductFilterModalProps {
-    visible: boolean
-    onClose: () => void
-    initialFilters?: FilterState
-    availableCategories?: string[]
-    onApplyFilters: (filters: FilterState) => void
+    activeFilters?: FilterState
+    onApplyFilters: (filters: FilterState | undefined) => void
 }
 
-const DEFAULT_CATEGORIES = [
-    'Hair Care',
-    'Skin Care',
-    'Immunity',
-    'Digestion',
-    'Wellness',
-    'Ayurvedic Oils',
-    'Malts & Powders',
-    'Personal Care',
-    'Juices & Syrups',
-    'Bundles & Kits',
-]
+const ProductFilterModal = forwardRef<ProductFilterModalRef, ProductFilterModalProps>(
+    ({ activeFilters, onApplyFilters }, ref) => {
+        const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+        const [visible, setVisible] = useState(false)
+        const t = getTexts(languageCode)
+        const filterTranslations = t.shop?.filterModal || {}
+        const { data: filterListingData } = useGetFilterListing('products')
+        const apiData = filterListingData?.data
+        const minPriceLimit = apiData?.priceRange?.min ?? 0
+        const maxPriceLimit = apiData?.priceRange?.max ?? 2500
+        const [sortBy, setSortBy] = useState<string>(activeFilters?.sortBy || '')
+        const [categories, setCategories] = useState<string[]>(activeFilters?.categories || [])
+        const [minPrice, setMinPrice] = useState<number>(activeFilters?.minPrice || minPriceLimit)
+        const [maxPrice, setMaxPrice] = useState<number>(activeFilters?.maxPrice || maxPriceLimit)
 
-const DEFAULT_FILTERS: FilterState = {
-    sortBy: 'popularity',
-    categories: [],
-    minPrice: 0,
-    maxPrice: 5000,
-}
+        useImperativeHandle(ref, () => ({
+            open: () => setVisible(true),
+            close: () => setVisible(false),
+        }))
 
-const ProductFilterModal: React.FC<ProductFilterModalProps> = ({
-    visible,
-    onClose,
-    initialFilters = DEFAULT_FILTERS,
-    availableCategories,
-    onApplyFilters,
-}) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
-    const filterTranslations = (t as any)?.shop?.filterModal || {}
-
-    const sortOptions = useMemo(
-        () => [
-            { id: 'popularity', label: filterTranslations.popularity },
-            { id: 'price_low_high', label: filterTranslations.priceLowToHigh },
-            { id: 'price_high_low', label: filterTranslations.priceHighToLow },
-            { id: 'rating', label: filterTranslations.rating },
-        ],
-        [filterTranslations]
-    )
-
-    const categoryOptions = useMemo(() => {
-        const list = availableCategories && availableCategories.length > 0 ? availableCategories : DEFAULT_CATEGORIES
-        return list.map((cat) => ({ id: cat, label: cat }))
-    }, [availableCategories])
-
-    const [sortBy, setSortBy] = useState<string>(initialFilters.sortBy || 'popularity')
-    const [categories, setCategories] = useState<string[]>(initialFilters.categories || [])
-    const [minPrice, setMinPrice] = useState<number>(initialFilters.minPrice ?? 0)
-    const [maxPrice, setMaxPrice] = useState<number>(initialFilters.maxPrice ?? 5000)
-
-    useEffect(() => {
-        if (visible) {
-            setSortBy(initialFilters.sortBy || 'popularity')
-            setCategories(initialFilters.categories || [])
-            setMinPrice(initialFilters.minPrice ?? 0)
-            setMaxPrice(initialFilters.maxPrice ?? 5000)
-        }
-    }, [visible, initialFilters])
-
-    const handleClearAll = useCallback(() => {
-        setSortBy('popularity')
-        setCategories([])
-        setMinPrice(0)
-        setMaxPrice(5000)
-    }, [])
-
-    const handleToggleCategory = useCallback((catId: string) => {
-        setCategories((prev) => {
-            if (prev.includes(catId)) {
-                return prev.filter((c) => c !== catId)
-            } else {
-                return [...prev, catId]
+        useEffect(() => {
+            if (visible) {
+                setSortBy(activeFilters?.sortBy || '')
+                setCategories(activeFilters?.categories || [])
+                setMinPrice(activeFilters?.minPrice ?? minPriceLimit)
+                setMaxPrice(activeFilters?.maxPrice ?? maxPriceLimit)
             }
-        })
-    }, [])
+        }, [visible, activeFilters, minPriceLimit, maxPriceLimit])
 
-    const handlePriceChange = useCallback((minVal: number, maxVal: number) => {
-        setMinPrice(minVal)
-        setMaxPrice(maxVal)
-    }, [])
+        const handleClose = () => setVisible(false)
 
-    const handleApply = useCallback(() => {
-        onApplyFilters({
-            sortBy,
-            categories,
-            minPrice,
-            maxPrice,
-        })
-        onClose()
-    }, [sortBy, categories, minPrice, maxPrice, onApplyFilters, onClose])
+        const handleClearAll = useCallback(() => {
+            setSortBy('')
+            setCategories([])
+            setMinPrice(minPriceLimit)
+            setMaxPrice(maxPriceLimit)
+            onApplyFilters(undefined)
+            setVisible(false)
+        }, [minPriceLimit, maxPriceLimit, onApplyFilters])
 
-    return (
-        <Modal
-            visible={visible}
-            animationType="slide"
-            transparent
-            onRequestClose={onClose}
-        >
-            <View style={styles.overlayContainer}>
-                {/* Backdrop press to dismiss */}
-                <TouchableWithoutFeedback onPress={onClose}>
-                    <View style={styles.backdrop} />
-                </TouchableWithoutFeedback>
+        const handleToggleCategory = useCallback((catId: string) => {
+            setCategories((prev) => {
+                if (prev.includes(catId)) {
+                    return prev.filter((c) => c !== catId)
+                } else {
+                    return [...prev, catId]
+                }
+            })
+        }, [])
 
-                {/* Bottom Sheet Card */}
-                <View style={styles.sheetContainer}>
-                    {/* Pull Handle */}
-                    <View style={styles.handleContainer}>
-                        <View style={styles.handlePill} />
-                    </View>
+        const handlePriceChange = useCallback((minVal: number, maxVal: number) => {
+            setMinPrice(minVal)
+            setMaxPrice(maxVal)
+        }, [])
 
-                    {/* Header */}
-                    <View style={styles.headerRow}>
-                        <Pressable onPress={onClose} style={styles.closeButton} hitSlop={10}>
-                            <CrossIcon width={getHeight(18)} height={getHeight(18)} color={colors.textDark} />
-                        </Pressable>
-                        <TextView text={filterTranslations.title} style={styles.headerTitle} />
-                        <Pressable onPress={handleClearAll} hitSlop={10}>
-                            <TextView text={filterTranslations.clearAll} style={styles.clearAllText} />
-                        </Pressable>
-                    </View>
+        const handleApply = useCallback(() => {
+            onApplyFilters({ sortBy, categories, minPrice, maxPrice, })
+            setVisible(false)
+        }, [sortBy, categories, minPrice, maxPrice, minPriceLimit, maxPriceLimit, onApplyFilters])
 
-                    <View style={styles.headerDivider} />
-
-                    <ScrollView
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.scrollContent}
-                    >
-                        {/* Section 1: Sort By */}
-                        <View style={styles.section}>
-                            <TextView text={filterTranslations.sortBy} style={styles.sectionTitle} />
-                            <View style={styles.chipsWrap}>
-                                {sortOptions.map((opt) => {
-                                    const isSelected = sortBy === opt.id
-                                    return (
-                                        <Pressable
-                                            key={opt.id}
-                                            style={[
-                                                styles.chip,
-                                                isSelected ? styles.chipSelected : styles.chipUnselected,
-                                            ]}
-                                            onPress={() => setSortBy(opt.id)}
-                                        >
-                                            <TextView
-                                                text={opt.label}
-                                                style={[
-                                                    styles.chipText,
-                                                    isSelected ? styles.chipTextSelected : styles.chipTextUnselected,
-                                                ]}
-                                            />
-                                        </Pressable>
-                                    )
-                                })}
-                            </View>
+        return (
+            <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose} >
+                <View style={styles.overlayContainer}>
+                    <TouchableWithoutFeedback onPress={handleClose}>
+                        <View style={styles.backdrop} />
+                    </TouchableWithoutFeedback>
+                    <View style={styles.sheetContainer}>
+                        <View style={styles.handleContainer}>
+                            <View style={styles.handlePill} />
+                        </View>
+                        <View style={styles.headerRow}>
+                            <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={10}>
+                                <CrossIcon width={getHeight(18)} height={getHeight(18)} color={colors.textDark} />
+                            </Pressable>
+                            <TextView text={filterTranslations.title} style={styles.headerTitle} />
+                            <Pressable onPress={handleClearAll} hitSlop={10}>
+                                <TextView text={filterTranslations.clearAll} style={styles.clearAllText} />
+                            </Pressable>
                         </View>
 
-                        <View style={styles.divider} />
-
-                        {/* Section 2: Categories */}
-                        <View style={styles.section}>
-                            <TextView text={filterTranslations.categories} style={styles.sectionTitle} />
-                            <View style={styles.chipsWrap}>
-                                {categoryOptions.map((cat) => {
-                                    const isSelected = categories.includes(cat.id)
-                                    return (
-                                        <Pressable
-                                            key={cat.id}
-                                            style={[
-                                                styles.chip,
-                                                isSelected ? styles.chipSelected : styles.chipUnselected,
-                                            ]}
-                                            onPress={() => handleToggleCategory(cat.id)}
-                                        >
-                                            <View style={styles.chipRow}>
-                                                {isSelected && (
-                                                    <TextView text="✓ " style={styles.checkmarkText} />
-                                                )}
-                                                <TextView
-                                                    text={cat.label}
-                                                    style={[
-                                                        styles.chipText,
-                                                        isSelected ? styles.chipTextSelected : styles.chipTextUnselected,
-                                                    ]}
-                                                />
-                                            </View>
-                                        </Pressable>
-                                    )
-                                })}
-                            </View>
-                        </View>
-
-                        <View style={styles.divider} />
-
-                        {/* Section 3: Price Range */}
-                        <View style={styles.section}>
-                            <View style={styles.priceHeaderRow}>
-                                <TextView text={filterTranslations.priceRange} style={styles.sectionTitle} />
-                                <TextView
-                                    text={`₹${minPrice} - ₹${maxPrice >= 5000 ? '5000+' : maxPrice}`}
-                                    style={styles.priceRangeValueText}
-                                />
+                        <View style={styles.headerDivider} />
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} >
+                            <View style={styles.section}>
+                                <TextView text={filterTranslations.sortBy} style={styles.sectionTitle} />
+                                <View style={styles.chipsWrap}>
+                                    {apiData?.sortBy?.map((opt) => {
+                                        const isSelected = sortBy === opt.key
+                                        return (
+                                            <Pressable key={opt.key} style={[styles.chip, isSelected ? styles.chipSelected : styles.chipUnselected,]} onPress={() => setSortBy(opt.key)} >
+                                                <TextView text={opt.label} style={[styles.chipText, isSelected ? styles.chipTextSelected : styles.chipTextUnselected,]} />
+                                            </Pressable>
+                                        )
+                                    })}
+                                </View>
                             </View>
 
-                            <PriceRangeSlider
-                                min={0}
-                                max={5000}
-                                step={100}
-                                minValue={minPrice}
-                                maxValue={maxPrice}
-                                onValueChange={handlePriceChange}
-                            />
-                        </View>
-                    </ScrollView>
+                            <View style={styles.divider} />
 
-                    {/* Apply Filters Button */}
-                    <View style={styles.footerContainer}>
-                        <Pressable style={styles.applyButton} onPress={handleApply}>
-                            <TextView text={filterTranslations.applyFilters} style={styles.applyButtonText} />
-                        </Pressable>
+                            <View style={styles.section}>
+                                <TextView text={filterTranslations.categories} style={styles.sectionTitle} />
+                                <View style={styles.chipsWrap}>
+                                    {apiData?.categories?.map((cat) => {
+                                        const isSelected = categories.includes(cat)
+                                        return (
+                                            <Pressable key={cat} style={[styles.chip, isSelected ? styles.chipSelected : styles.chipUnselected,]} onPress={() => handleToggleCategory(cat)} >
+                                                <View style={styles.chipRow}>
+                                                    {isSelected && (<TextView text="✓ " style={styles.checkmarkText} />)}
+                                                    <TextView text={cat} style={[styles.chipText, isSelected ? styles.chipTextSelected : styles.chipTextUnselected,]} />
+                                                </View>
+                                            </Pressable>
+                                        )
+                                    })}
+                                </View>
+                            </View>
+
+                            <View style={styles.divider} />
+
+                            <View style={styles.section}>
+                                <View style={styles.priceHeaderRow}>
+                                    <TextView text={filterTranslations.priceRange} style={styles.sectionTitle} />
+                                    <TextView text={`₹${minPrice} - ₹${maxPrice >= maxPriceLimit ? `${maxPriceLimit}+` : maxPrice}`} style={styles.priceRangeValueText} />
+                                </View>
+
+                                <PriceRangeSlider min={minPriceLimit} max={maxPriceLimit} step={100} minValue={minPrice} maxValue={maxPrice} onValueChange={handlePriceChange} />
+                            </View>
+                        </ScrollView>
+
+                        <View style={styles.footerContainer}>
+                            <Pressable style={styles.applyButton} onPress={handleApply}>
+                                <TextView text={filterTranslations.applyFilters} style={styles.applyButtonText} />
+                            </Pressable>
+                        </View>
                     </View>
                 </View>
-            </View>
-        </Modal>
-    )
-}
+            </Modal>
+        )
+    })
 
 const styles = StyleSheet.create({
     overlayContainer: {
         flex: 1,
         justifyContent: 'flex-end',
-        backgroundColor: colors.modalOverlayBg || 'rgba(0,0,0,0.45)',
+        backgroundColor: colors.modalOverlayBg,
     },
     backdrop: {
         position: 'absolute',
@@ -277,7 +184,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 28,
         maxHeight: '85%',
         paddingBottom: 20,
-        shadowColor: '#000',
+        shadowColor: colors.black,
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.1,
         shadowRadius: 10,
@@ -291,7 +198,7 @@ const styles = StyleSheet.create({
         width: 44,
         height: 5,
         borderRadius: 3,
-        backgroundColor: colors.handlePillBg || '#D8DDD9',
+        backgroundColor: colors.handlePillBg,
     },
     headerRow: {
         flexDirection: 'row',
@@ -322,7 +229,7 @@ const styles = StyleSheet.create({
     },
     headerDivider: {
         height: 1,
-        backgroundColor: colors.dividerBg || '#F0F0F0',
+        backgroundColor: colors.dividerBg,
         marginBottom: 8,
     },
     scrollContent: {
@@ -335,13 +242,13 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: getHeight(15),
         fontWeight: '600',
-        color: '#4A4A4A',
+        color: colors.textDark,
         marginBottom: 12,
     },
     categorySearchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.searchBg || '#F2F4F3',
+        backgroundColor: colors.searchBg,
         borderRadius: getHeight(12),
         paddingHorizontal: 12,
         height: getHeight(40),
@@ -382,7 +289,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.darkGreen,
     },
     chipUnselected: {
-        backgroundColor: '#F3F0EA',
+        backgroundColor: colors.pillBg,
     },
     chipText: {
         fontSize: getHeight(10),
@@ -392,7 +299,7 @@ const styles = StyleSheet.create({
         color: colors.white,
     },
     chipTextUnselected: {
-        color: '#2C2C2C',
+        color: colors.textDark,
     },
     checkmarkText: {
         fontSize: getHeight(14),
@@ -401,7 +308,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: colors.dividerBg || '#F0F0F0',
+        backgroundColor: colors.dividerBg,
         marginVertical: 6,
     },
     priceHeaderRow: {
