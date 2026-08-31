@@ -8,6 +8,13 @@
             "profile": "Profile",
             "wishlist": "Wishlist"
         },
+        "home": {
+            "logoText": "Amrutam",
+            "doctor": "Doctor",
+            "shop": "Shop",
+            "wishlist": "Wishlist",
+            "cart": "Cart"
+        },
         "doctors": {
             "logoText": "Amrutam",
             "findDoctorTitle": "Find your Ayurvedic doctor",

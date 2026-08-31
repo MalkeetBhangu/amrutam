@@ -33,6 +33,7 @@ export const HomeNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.HOME} screenOptions={{ headerShown: false }}>
             <Stack.Screen name={Screens.HOME} component={withTopSafeArea(Home)} />
+            <Stack.Screen name={Screens.CART} component={withTopSafeArea(Cart)} />
         </Stack.Navigator>
     )
 }
