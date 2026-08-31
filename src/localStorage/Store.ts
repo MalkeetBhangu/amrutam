@@ -1,7 +1,6 @@
-// import { MMKV } from 'react-native-mmkv'
+import { MMKV } from 'react-native-mmkv'
 
-// export const dataStorage = new MMKV()
-export const dataStorage = {}
+export const dataStorage = new MMKV()
 
 export enum STORAGE {
     USER = 'USER',

@@ -1,3 +1,4 @@
+import { DEFAULT_LANGUAGE_CODE } from '@src/constants/Constants'
 import { localStorage, STORAGE } from 'src/localStorage/Store'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -5,7 +6,8 @@ import { persist } from 'zustand/middleware'
 
 
 export interface UserType {
-    isLoggedIn: boolean
+    userId?: string
+    languageCode: string
 }
 
 interface UserState {
@@ -18,7 +20,8 @@ export const useUserStore = create<UserState>()(
     persist(
         (set) => ({
             userData: {
-                isLoggedIn: false
+                userId: '',
+                languageCode: DEFAULT_LANGUAGE_CODE
             } as Partial<UserType>,
             setUserData: (data: Partial<UserType>) =>
                 set((state) => ({

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Navigation from 'src/navigation';
 import { QueryClientProvider } from 'src/apiConfigs/QueryClientProvider';
@@ -9,6 +9,7 @@ function App() {
   return (
     <QueryClientProvider>
       <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" backgroundColor={colors.screenBackground} />
         <View style={styles.container}>
           <Navigation />
         </View>

@@ -112,8 +112,22 @@
             "buyNow": "Buy now",
             "addedToCart": "Added to cart successfully!"
         },
+        "login": {
+            "title": "Create your account",
+            "subtitle": "Join Amrutam for consults, shop and\nrecords",
+            "expertConsults": "Expert Consults",
+            "expertConsultsDesc": "Connect with Ayurvedic practitioners",
+            "curatedShop": "Curated Shop",
+            "curatedShopDesc": "Authentic wellness products",
+            "createAccountBtn": "Create account",
+            "alreadyHaveAccount": "Already have an account? ",
+            "logIn": "Log in",
+            "errorTitle": "Error",
+            "userCreateError": "User is not created. Please check your internet connection."
+        },
         "common": {
             "appName": "Amrutam",
+            "createAccount": "Create account",
             "comingSoon": "Coming Soon 🚀",
             "comingSoonSubtitle": "We are working hard to bring this feature to you soon!"
         }
