@@ -15,6 +15,14 @@
             "wishlist": "Wishlist",
             "cart": "Cart"
         },
+        "records": {
+            "logoText": "Amrutam",
+            "comingSoonTitle": "Records Coming Soon",
+            "comingSoonSubtitle": "We're perfecting your digital health vault. Stay tuned for a seamless way to manage your Ayurvedic journey.",
+            "notifyMe": "Notify Me",
+            "notifySuccessTitle": "Notification Set",
+            "notifySuccessMessage": "You will be notified as soon as Records is available!"
+        },
         "doctors": {
             "logoText": "Amrutam",
             "findDoctorTitle": "Find your Ayurvedic doctor",
