@@ -94,6 +94,8 @@
             "emptyCartSubtitle": "Discover our range of Ayurvedic essentials and start your wellness journey today.",
             "shopNow": "Shop Now",
             "applyPromoCode": "Apply Promo Code",
+            "promoCodeTitle": "Promo Code",
+            "promoCodeDialog": "Enter promo code dialog",
             "orderSummary": "Order Summary",
             "subtotal": "Subtotal",
             "deliveryFee": "Delivery fee",
@@ -101,6 +103,7 @@
             "total": "Total",
             "ecoBannerText": "Your order will be packed in 100% biodegradable materials, supporting our commitment to Mother Earth.",
             "checkout": "Checkout",
+            "checkoutProceeding": "Proceeding to checkout for",
             "clear": "Clear"
         },
         "wishlist": {

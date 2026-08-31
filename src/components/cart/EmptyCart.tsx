@@ -6,32 +6,24 @@ import { getHeight } from 'src/libs/StyleHelper'
 import { emptyBasket as EmptyBasketIcon, bag as BagIcon } from 'assets'
 import { getTexts } from 'src/translations/TranslationHelper'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface EmptyCartProps {
     onShopNowPress?: () => void
 }
 
 const EmptyCart: React.FC<EmptyCartProps> = ({ onShopNowPress }) => {
-    const textData = getTexts(DEFAULT_LANGUAGE_CODE)
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const textData = getTexts(languageCode)
     const cartTexts = textData.cart
 
     return (
         <View style={styles.container}>
-            {/* Wicker Basket Illustration Container */}
             <View style={styles.illustrationWrapper}>
                 <EmptyBasketIcon width={getHeight(230)} height={getHeight(230)} />
             </View>
-
-            {/* Title */}
             <TextView text={cartTexts.emptyCartTitle} style={styles.titleText} />
-
-            {/* Subtitle */}
-            <TextView
-                text={cartTexts.emptyCartSubtitle}
-                style={styles.subtitleText}
-            />
-
-            {/* Shop Now Action Button */}
+            <TextView text={cartTexts.emptyCartSubtitle} style={styles.subtitleText} />
             <Pressable style={styles.shopNowButton} onPress={onShopNowPress}>
                 <BagIcon width={getHeight(18)} height={getHeight(18)} color={colors.white} />
                 <TextView text={cartTexts.shopNow} style={styles.shopNowText} />

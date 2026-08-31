@@ -6,29 +6,24 @@ import { getHeight } from 'src/libs/StyleHelper'
 import { emptyBasket as EmptyBasketIcon, arrowRight as ArrowRightIcon } from 'assets'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getTexts } from 'src/translations/TranslationHelper'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface EmptyWishlistProps {
     onExploreShopPress?: () => void
 }
 
 const EmptyWishlist: React.FC<EmptyWishlistProps> = ({ onExploreShopPress }) => {
-    const textData = getTexts(DEFAULT_LANGUAGE_CODE)
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const textData = getTexts(languageCode)
     const wishlistTexts = textData.wishlist
 
     return (
         <View style={styles.container}>
-            {/* Basket Illustration */}
             <View style={styles.illustrationWrapper}>
                 <EmptyBasketIcon width={getHeight(200)} height={getHeight(200)} />
             </View>
-
-            {/* Title */}
             <TextView text={wishlistTexts.emptyTitle} style={styles.titleText} />
-
-            {/* Subtitle */}
             <TextView text={wishlistTexts.emptySubtitle} style={styles.subtitleText} />
-
-            {/* Explore Shop Action Button */}
             <Pressable style={styles.exploreButton} onPress={onExploreShopPress} hitSlop={6}>
                 <TextView text={wishlistTexts.exploreShop} style={styles.exploreText} />
                 <ArrowRightIcon width={getHeight(16)} height={getHeight(16)} color={colors.white} />

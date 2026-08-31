@@ -1,47 +1,31 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import {
-    StyleSheet,
-    View,
-    ScrollView,
-    Image,
-    Pressable,
-    ActivityIndicator,
-    Alert,
-} from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-import colors from 'src/tokens/Colors'
-import TextView from 'src/components/sharedComponents/TextView'
-import { getHeight } from 'src/libs/StyleHelper'
-import {
-    logo,
-    backArrow as BackArrowIcon,
-    trash as TrashIcon,
-    promo as PromoIcon,
-    arrowRight as ArrowRightIcon,
-    chevronDown as ChevronRightIcon,
-    minus as MinusIcon,
-    plus as PlusIcon,
-} from 'assets'
-import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
-import { getTexts } from 'src/translations/TranslationHelper'
+import useClearCart from '@src/apis/useClearCart'
 import useGetCart from '@src/apis/useGetCart'
-import useAddToCart from '@src/apis/useAddToCart'
 import useRemoveFromCart from '@src/apis/useRemoveFromCart'
 import useUpdateCartQuantity from '@src/apis/useUpdateCartQuantity'
-import useClearCart from '@src/apis/useClearCart'
+import { useUserState } from '@src/store/UseUserStore'
+import { arrowRight as ArrowRightIcon, backArrow as BackArrowIcon, chevronDown as ChevronRightIcon, logo, promo as PromoIcon } from 'assets'
+import React, { useCallback, useMemo } from 'react'
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, View, } from 'react-native'
+import TextView from 'src/components/sharedComponents/TextView'
+import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { getHeight } from 'src/libs/StyleHelper'
+import colors from 'src/tokens/Colors'
+import { getTexts } from 'src/translations/TranslationHelper'
 import { CartItem } from 'src/types/CartTypes'
-import EmptyCart from './EmptyCart'
 import CartItemCard from './CartItemCard'
+import EmptyCart from './EmptyCart'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { ParamsList } from '@src/navigation/useNavigation'
 
 const CartScreen: React.FC = () => {
-    const navigation = useNavigation<any>()
-    const { data: cartData, isLoading } = useGetCart('guest')
-    const { mutate: addToCartMutate } = useAddToCart()
+    const { userData: { userId, languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['userId', 'languageCode'])
+    const navigation = useNavigation<StackNavigationProp<ParamsList>>()
+    const { data: cartData, isLoading } = useGetCart(userId ?? '')
     const { mutate: removeFromCartMutate } = useRemoveFromCart()
     const { mutate: updateCartQtyMutate } = useUpdateCartQuantity()
     const { mutate: clearCartMutate } = useClearCart()
-
-    const textData = getTexts(DEFAULT_LANGUAGE_CODE)
+    const textData = getTexts(languageCode)
     const cartTexts = textData.cart
 
     const cartItems: CartItem[] = useMemo(() => {
@@ -53,23 +37,9 @@ const CartScreen: React.FC = () => {
         return []
     }, [cartData])
 
-    const handleBackPress = useCallback(() => {
-        navigation.goBack()
-    }, [navigation])
+    const handleBackPress = useCallback(() => { navigation.goBack() }, [navigation])
 
-    const handleShopNowPress = useCallback(() => {
-        navigation.goBack()
-    }, [navigation])
-
-    const handleClearCart = useCallback(() => {
-        console.log('Clearing all items from cart...')
-        cartItems.forEach((item) => {
-            const targetProdId = (item as any).productId || item.id
-            if (targetProdId) {
-                removeFromCartMutate({ userId: 'guest', productId: targetProdId })
-            }
-        })
-    }, [cartItems, removeFromCartMutate])
+    const handleClearCart = useCallback(() => { clearCartMutate({ userId }) }, [cartItems, removeFromCartMutate])
 
     const handleIncreaseQty = useCallback(
         (id: string) => {
@@ -77,7 +47,7 @@ const CartScreen: React.FC = () => {
             if (target) {
                 const targetProdId = (target as any).productId || target.id
                 const newQty = (target.quantity || 1) + 1
-                updateCartQtyMutate({ userId: 'guest', productId: targetProdId, quantity: newQty })
+                updateCartQtyMutate({ userId: userId, productId: targetProdId, quantity: newQty })
             }
         },
         [cartItems, updateCartQtyMutate]
@@ -89,10 +59,10 @@ const CartScreen: React.FC = () => {
             if (target) {
                 const targetProdId = (target as any).productId || target.id
                 if (target.quantity <= 1) {
-                    removeFromCartMutate({ userId: 'guest', productId: targetProdId })
+                    removeFromCartMutate({ userId: userId, productId: targetProdId })
                 } else {
                     const newQty = target.quantity - 1
-                    updateCartQtyMutate({ userId: 'guest', productId: targetProdId, quantity: newQty })
+                    updateCartQtyMutate({ userId: userId, productId: targetProdId, quantity: newQty })
                 }
             }
         },
@@ -104,13 +74,12 @@ const CartScreen: React.FC = () => {
             const target = cartItems.find((i) => i.id === id || (i as any).productId === id)
             if (target) {
                 const targetProdId = (target as any).productId || target.id
-                removeFromCartMutate({ userId: 'guest', productId: targetProdId })
+                removeFromCartMutate({ userId, productId: targetProdId })
             }
         },
-        [cartItems, removeFromCartMutate]
+        [cartItems, removeFromCartMutate, userId]
     )
 
-    // Calculations
     const subtotal = useMemo(() => {
         return cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0)
     }, [cartItems])
@@ -124,12 +93,11 @@ const CartScreen: React.FC = () => {
     const totalAmount = subtotal + deliveryFee + taxes
 
     const handleCheckout = useCallback(() => {
-        Alert.alert('Checkout', `Proceeding to checkout for ₹${totalAmount.toLocaleString()}`)
-    }, [totalAmount])
+        Alert.alert(cartTexts.checkout, `${cartTexts.checkoutProceeding} ₹${totalAmount.toLocaleString()}`)
+    }, [totalAmount, cartTexts])
 
     return (
         <View style={styles.container}>
-            {/* Top Navigation Header */}
             <View style={styles.headerBar}>
                 <Pressable onPress={handleBackPress} style={styles.backButton} hitSlop={10}>
                     <BackArrowIcon width={getHeight(20)} height={getHeight(20)} color={colors.textDark} />
@@ -150,17 +118,10 @@ const CartScreen: React.FC = () => {
                     <ActivityIndicator size="large" color={colors.darkGreen} />
                 </View>
             ) : cartItems.length === 0 ? (
-                /* Empty Cart UI Component */
-                <EmptyCart onShopNowPress={handleShopNowPress} />
+                <EmptyCart onShopNowPress={handleBackPress} />
             ) : (
-                /* Cart Items List UI */
                 <>
-                    <ScrollView
-                        style={styles.scrollContainer}
-                        contentContainerStyle={styles.scrollContent}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        {/* Section 1: Items in your cart + Clear button */}
+                    <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} >
                         <View style={styles.sectionHeader}>
                             <TextView text={cartTexts.itemsInCart} style={styles.sectionTitle} />
                             <Pressable onPress={handleClearCart} hitSlop={8}>
@@ -171,18 +132,11 @@ const CartScreen: React.FC = () => {
                         {cartItems.map((item) => {
                             const itemId = item.productId || item.id
                             return (
-                                <CartItemCard
-                                    key={itemId}
-                                    item={item}
-                                    onIncrease={handleIncreaseQty}
-                                    onDecrease={handleDecreaseQty}
-                                    onDelete={handleDeleteItem}
-                                />
+                                <CartItemCard key={itemId} item={item} onIncrease={handleIncreaseQty} onDecrease={handleDecreaseQty} onDelete={handleDeleteItem} />
                             )
                         })}
 
-                        {/* Section 2: Promo Code Card */}
-                        <Pressable style={styles.promoCard} onPress={() => Alert.alert('Promo Code', 'Enter promo code dialog')}>
+                        <Pressable style={styles.promoCard} onPress={() => Alert.alert(cartTexts.promoCodeTitle, cartTexts.promoCodeDialog)}>
                             <View style={styles.promoLeftRow}>
                                 <PromoIcon width={getHeight(20)} height={getHeight(20)} color={colors.darkGreen} />
                                 <TextView text={cartTexts.applyPromoCode} style={styles.promoText} />
@@ -192,7 +146,6 @@ const CartScreen: React.FC = () => {
 
                         <View style={styles.dividerLine} />
 
-                        {/* Section 3: Order Summary */}
                         <View style={styles.summarySection}>
                             <TextView text={cartTexts.orderSummary} style={styles.sectionTitle} />
 
@@ -219,19 +172,14 @@ const CartScreen: React.FC = () => {
                             </View>
                         </View>
 
-                        {/* Section 4: Eco Commitment Note */}
                         <View style={styles.ecoBanner}>
                             <View style={styles.ecoIconCircle}>
                                 <Image source={logo} style={styles.ecoLogo} resizeMode="contain" />
                             </View>
-                            <TextView
-                                text={cartTexts.ecoBannerText}
-                                style={styles.ecoText}
-                            />
+                            <TextView text={cartTexts.ecoBannerText} style={styles.ecoText} />
                         </View>
                     </ScrollView>
 
-                    {/* Sticky Bottom Checkout Footer */}
                     <View style={styles.checkoutFooter}>
                         <Pressable style={styles.checkoutButton} onPress={handleCheckout}>
                             <TextView text={cartTexts.checkout} style={styles.checkoutText} />
@@ -319,95 +267,14 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: colors.textSecondary,
     },
-    cartCard: {
-        flexDirection: 'row',
-        backgroundColor: colors.white,
-        borderRadius: getHeight(16),
-        padding: 14,
-        marginBottom: 14,
-        borderWidth: 1,
-        borderColor: colors.cardBorder,
-        elevation: 1,
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.04,
-        shadowRadius: 4,
-    },
-    productThumbnail: {
-        width: getHeight(76),
-        height: getHeight(76),
-        borderRadius: getHeight(12),
-        backgroundColor: '#F7F5F0',
-    },
-    cardDetailsColumn: {
-        flex: 1,
-        marginLeft: 14,
-        justifyContent: 'space-between',
-    },
-    cardTopRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    productTitle: {
-        fontSize: getHeight(15),
-        fontWeight: '600',
-        color: colors.textDark,
-        flex: 1,
-        marginRight: 8,
-    },
-    productPrice: {
-        fontSize: getHeight(16),
-        fontWeight: '700',
-        color: colors.textDark,
-    },
-    variantText: {
-        fontSize: getHeight(13),
-        color: colors.textSecondary,
-        marginTop: 2,
-    },
-    cardBottomRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginTop: 10,
-    },
-    stepperContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-        borderRadius: getHeight(18),
-        paddingHorizontal: 8,
-        height: getHeight(34),
-        minWidth: getHeight(95),
-        justifyContent: 'space-between',
-    },
-    stepperBtn: {
-        width: getHeight(26),
-        height: getHeight(26),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    stepperSymbol: {
-        fontSize: getHeight(14),
-        fontWeight: '600',
-        color: colors.textDark,
-    },
-    stepperQtyText: {
-        fontSize: getHeight(14),
-        fontWeight: '600',
-        color: colors.textDark,
-        marginHorizontal: 8,
-    },
     promoCard: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#F8FAF8',
+        backgroundColor: colors.infoBoxBg,
         borderRadius: getHeight(16),
         borderWidth: 1,
-        borderColor: '#C2D1C8',
+        borderColor: colors.dashedBorder,
         borderStyle: 'dashed',
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -426,7 +293,7 @@ const styles = StyleSheet.create({
     },
     dividerLine: {
         height: 1,
-        backgroundColor: '#EEEEEE',
+        backgroundColor: colors.dividerBg,
         marginBottom: 20,
     },
     summarySection: {
@@ -449,7 +316,7 @@ const styles = StyleSheet.create({
     },
     dashedDivider: {
         borderWidth: 0.5,
-        borderColor: '#E0E0E0',
+        borderColor: colors.dashedBorder,
         borderStyle: 'dashed',
         marginVertical: 16,
     },
@@ -471,7 +338,7 @@ const styles = StyleSheet.create({
     ecoBanner: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#DFE7E3',
+        backgroundColor: colors.bookingIconBg,
         borderRadius: getHeight(14),
         padding: 14,
         marginTop: 10,
@@ -491,7 +358,7 @@ const styles = StyleSheet.create({
     },
     ecoText: {
         fontSize: getHeight(12),
-        color: '#4A5B53',
+        color: colors.textDark,
         flex: 1,
         lineHeight: getHeight(17),
     },

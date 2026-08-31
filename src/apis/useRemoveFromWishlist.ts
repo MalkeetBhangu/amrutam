@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Alert } from 'react-native'
 import { QUERY_KEYS } from './ApiConstants'
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL
@@ -11,7 +12,7 @@ export interface RemoveFromWishlistPayload {
 export const removeFromWishlist = async (payload: RemoveFromWishlistPayload) => {
     const url = `${BASE_URL}/wishlist/remove`
     const bodyData = {
-        userId: payload.userId || 'guest',
+        userId: payload.userId,
         productId: payload.productId,
     }
 
@@ -25,8 +26,17 @@ export const removeFromWishlist = async (payload: RemoveFromWishlistPayload) => 
         body: JSON.stringify(bodyData),
     })
 
+    if (!response.ok) {
+        throw new Error('Failed to remove item from wishlist')
+    }
+
     const data = await response.json()
     console.log('Remove from wishlist response:', data)
+
+    if (data.success === false) {
+        throw new Error(data.message || 'Failed to remove item from wishlist')
+    }
+
     return data
 }
 
@@ -40,8 +50,9 @@ export const useRemoveFromWishlist = () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WISHLIST] })
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRODUCTS] })
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.error('Error removing item from wishlist:', error)
+            Alert.alert('Error', error?.message || 'Failed to remove item from wishlist. Please try again.')
         },
     })
 }
