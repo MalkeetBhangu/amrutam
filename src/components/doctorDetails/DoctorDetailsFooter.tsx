@@ -6,6 +6,7 @@ import TextView from 'src/components/sharedComponents/TextView'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
 import { getTexts } from 'src/translations/TranslationHelper'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface DoctorDetailsFooterProps {
     consultationFee?: number | string | null
@@ -15,18 +16,12 @@ export interface DoctorDetailsFooterProps {
     hasBookings?: boolean
 }
 
-const DoctorDetailsFooter: React.FC<DoctorDetailsFooterProps> = ({
-    consultationFee,
-    onBookPress,
-    disabled = false,
-    buttonText,
-    hasBookings = false,
-}) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
+const DoctorDetailsFooter: React.FC<DoctorDetailsFooterProps> = ({ consultationFee, onBookPress, disabled = false, buttonText, hasBookings = false, }) => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
     const detailsText = t.doctors.details
 
-    const displayButtonText =
-        buttonText || (hasBookings ? '← Go back to My Bookings' : detailsText.bookAppointment)
+    const displayButtonText = buttonText || (hasBookings ? detailsText.goBackToMyBookings : detailsText.bookAppointment)
 
     if (hasBookings) {
         return (
@@ -45,7 +40,6 @@ const DoctorDetailsFooter: React.FC<DoctorDetailsFooterProps> = ({
         )
     }
 
-    if (consultationFee == null) return null
 
     return (
         <View style={styles.footerContainer}>

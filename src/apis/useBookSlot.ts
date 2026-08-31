@@ -6,6 +6,7 @@ import { QUERY_KEYS } from "./ApiConstants"
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL
 
 export interface BookSlotPayload {
+    userId: string
     doctorId: string
     date: string
     slotId: string
@@ -25,19 +26,20 @@ const fetchBookSlot = async (payload: BookSlotPayload) => {
     const data = await response.json()
     return data
 }
-
-const useBookSlot = (defaultDoctorId?: string, defaultDate?: string, defaultSlotId?: string) => {
+``
+const useBookSlot = (userId: string, doctorId?: string, date?: string, slotId?: string) => {
     const queryClient = useQueryClient()
     const queryResult = useMutation<GetDoctorSlotsRangeResponse, Error, BookSlotPayload | void>({
         mutationFn: (payload?: BookSlotPayload | void) => {
             const finalPayload: BookSlotPayload = {
-                doctorId: payload?.doctorId || defaultDoctorId || '',
-                date: payload?.date || defaultDate || '',
-                slotId: payload?.slotId || defaultSlotId || '',
+                userId: payload?.userId ?? '',
+                doctorId: payload?.doctorId ?? '',
+                date: payload?.date ?? '',
+                slotId: payload?.slotId ?? '',
             }
             return fetchBookSlot(finalPayload)
         },
-        mutationKey: [QUERY_KEYS.BOOK_SLOTS, defaultDoctorId, defaultDate, defaultSlotId],
+        mutationKey: [QUERY_KEYS.BOOK_SLOTS, userId, doctorId, date, slotId],
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCTORS_SLOTS] })
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DOCTORS] })

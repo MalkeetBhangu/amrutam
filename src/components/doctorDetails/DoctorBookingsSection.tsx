@@ -6,61 +6,58 @@ import { getHeight } from 'src/libs/StyleHelper'
 import { records as CalendarIcon } from 'assets'
 import { BookingItem } from '@src/types/DoctorTypes'
 
+import { useUserState } from '@src/store/UseUserStore'
+import { getTexts } from 'src/translations/TranslationHelper'
+import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import useGetDoctorSlots from '@src/apis/useGetDoctorSlots'
+import useCancelBooking from '@src/apis/useCancelBooking'
+import { formatDateString, formatTimeString } from './DoctorHelper'
+
 export interface DoctorBookingsSectionProps {
-    bookings: BookingItem[]
-    onCancelBooking: (booking: BookingItem) => void
-    isCancelling?: boolean
+    doctorId: string
+    onCancelSuccess?: () => void
 }
 
-const formatDateString = (dateStr: string): string => {
-    if (!dateStr) return ''
-    const parts = dateStr.split('-')
-    if (parts.length === 3) {
-        const year = parseInt(parts[0], 10)
-        const month = parseInt(parts[1], 10) - 1
-        const day = parseInt(parts[2], 10)
-        const d = new Date(year, month, day)
-        if (!isNaN(d.getTime())) {
-            const dayOfWeek = d.toLocaleDateString('en-US', { weekday: 'short' })
-            const monthName = d.toLocaleDateString('en-US', { month: 'short' })
-            return `${dayOfWeek}, ${day} ${monthName}`
-        }
-    }
-    return dateStr
-}
 
-const formatTimeString = (timeStr: string): string => {
-    if (!timeStr) return ''
-    if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr
 
-    const parts = timeStr.trim().split(':')
-    if (parts.length >= 2) {
-        let hours = parseInt(parts[0], 10)
-        const minutes = parts[1]
-        const ampm = hours >= 12 ? 'PM' : 'AM'
-        hours = hours % 12 || 12
-        return `${hours}:${minutes} ${ampm}`
-    }
-    return timeStr
-}
-
-const DoctorBookingsSection: React.FC<DoctorBookingsSectionProps> = ({
-    bookings,
-    onCancelBooking,
-    isCancelling = false,
-}) => {
-    if (!bookings || bookings.length === 0) return null
+const DoctorBookingsSection: React.FC<DoctorBookingsSectionProps> = ({ doctorId, onCancelSuccess, }) => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE, userId } } = useUserState(['languageCode', 'userId'])
+    const t = getTexts(languageCode)
+    const bookingTranslations = t.doctors?.bookings || {}
+    const { data: slotsData } = useGetDoctorSlots(doctorId, '2026-08-30', '2026-09-12')
+    const { mutate: cancelBooking, isPending: isCancelling } = useCancelBooking()
+    const bookings = slotsData?.data?.bookings || []
 
     const handleCancelPress = (booking: BookingItem) => {
         Alert.alert(
-            'Cancel Booking',
-            'Are you sure you want to cancel this booking?',
+            bookingTranslations.cancelBooking,
+            bookingTranslations.cancelConfirm,
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: bookingTranslations.cancel, style: 'cancel' },
                 {
-                    text: 'OK',
+                    text: bookingTranslations.ok,
                     style: 'destructive',
-                    onPress: () => onCancelBooking(booking),
+                    onPress: () => {
+                        cancelBooking(
+                            {
+                                userId: userId ?? '',
+                                doctorId: booking.doctorId || doctorId,
+                                date: booking.date,
+                                slotId: booking.slot?.id || '',
+                            },
+                            {
+                                onSuccess: () => {
+                                    onCancelSuccess?.()
+                                },
+                                onError: (error: any) => {
+                                    Alert.alert(
+                                        bookingTranslations.errorTitle,
+                                        error?.message || bookingTranslations.errorMessage
+                                    )
+                                },
+                            }
+                        )
+                    },
                 },
             ]
         )
@@ -68,7 +65,7 @@ const DoctorBookingsSection: React.FC<DoctorBookingsSectionProps> = ({
 
     return (
         <View style={styles.sectionContainer}>
-            <TextView text="My Bookings" style={styles.sectionTitle} />
+            <TextView text={bookingTranslations.title} style={styles.sectionTitle} />
 
             {bookings.map((booking, index) => {
                 const formattedDate = formatDateString(booking.date)
@@ -93,7 +90,7 @@ const DoctorBookingsSection: React.FC<DoctorBookingsSectionProps> = ({
                             onPress={() => handleCancelPress(booking)}
                             style={styles.cancelButton}
                         >
-                            <TextView text="Cancel Booking" style={styles.cancelText} />
+                            <TextView text={bookingTranslations.cancelBooking} style={styles.cancelText} />
                         </Pressable>
                     </View>
                 )
@@ -131,7 +128,7 @@ const styles = StyleSheet.create({
         width: getHeight(48),
         height: getHeight(48),
         borderRadius: getHeight(14),
-        backgroundColor: 'rgba(235, 245, 240, 1)',
+        backgroundColor: colors.bookingIconBg,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -156,7 +153,7 @@ const styles = StyleSheet.create({
     cancelText: {
         fontSize: getHeight(14),
         fontWeight: '600',
-        color: '#D32F2F',
+        color: colors.cancelRed,
     },
 })
 

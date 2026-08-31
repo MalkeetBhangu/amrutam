@@ -64,7 +64,19 @@
                 "morning": "Morning",
                 "afternoon": "Afternoon",
                 "consultationFee": "Consultation Fee",
-                "bookAppointment": "Book Appointment"
+                "bookAppointment": "Book Appointment",
+                "goBackToMyBookings": "← Go back to My Bookings",
+                "errorTitle": "Error",
+                "errorMessage": "Failed to book slot. Please try again."
+            },
+            "bookings": {
+                "title": "My Bookings",
+                "cancelBooking": "Cancel Booking",
+                "cancelConfirm": "Are you sure you want to cancel this booking?",
+                "cancel": "Cancel",
+                "ok": "OK",
+                "errorTitle": "Error",
+                "errorMessage": "Failed to cancel booking. Please try again."
             }
         },
         "cart": {

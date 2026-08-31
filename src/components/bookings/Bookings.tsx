@@ -10,6 +10,7 @@ import { Screens } from '@src/constants/Screens'
 import useGetBookings from '@src/apis/useGetBookings'
 import useCancelBooking from '@src/apis/useCancelBooking'
 import { BookingItem } from 'src/types/DoctorTypes'
+import { useUserState } from '@src/store/UseUserStore'
 
 const formatDateDisplay = (dateStr: string): string => {
     if (!dateStr) return ''
@@ -63,6 +64,7 @@ const formatTimeDisplay = (startTime: string, endTime?: string): string => {
 }
 
 const Bookings: React.FC = () => {
+    const { userData: { userId } } = useUserState(['userId'])
     const navigation = useNavigation<any>()
     const route = useRoute<any>()
     const routeBookings = route.params?.bookings
@@ -120,6 +122,7 @@ const Bookings: React.FC = () => {
 
                             cancelBooking(
                                 {
+                                    userId: userId ?? '',
                                     doctorId: targetDoctorId,
                                     slotId: targetSlotId,
                                     date: targetDate,

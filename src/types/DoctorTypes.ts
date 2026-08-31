@@ -67,6 +67,7 @@ export interface BookingItem {
 }
 
 export interface DoctorSlotsRangeData {
+    userId: string
     doctorId: string
     doctorName: string
     from?: string
@@ -76,7 +77,6 @@ export interface DoctorSlotsRangeData {
     slots?: SlotItem[]
     bookings?: BookingItem[]
     hasBooking?: boolean
-    hasBookings?: boolean
 }
 
 export interface GetDoctorSlotsRangeResponse {

@@ -1,64 +1,59 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { StyleSheet, View, Image } from 'react-native'
 import { star as StarIcon, clockIcon as ClockIcon, verified as VerifiedIcon } from 'assets'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
-import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
 import { getTexts } from 'src/translations/TranslationHelper'
+import { useUserState } from '@src/store/UseUserStore'
+import { Doctor } from '@src/types/DoctorTypes'
 
 export interface DoctorHeroSectionProps {
-    imageSource: any
-    isVerified: boolean
-    doctorName?: string
-    specialtyText?: string
-    ratingVal?: string | null
-    reviewsCountText?: string | number | null
-    experienceYears?: number | string | null
+    doctor: Doctor
+
 }
 
-const DoctorHeroSection: React.FC<DoctorHeroSectionProps> = ({
-    imageSource,
-    isVerified,
-    doctorName,
-    specialtyText,
-    ratingVal,
-    reviewsCountText,
-    experienceYears,
-}) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
+const DoctorHeroSection: React.FC<DoctorHeroSectionProps> = ({ doctor }) => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
     const detailsText = t.doctors.details
+    const { rating, experience, verified, image, name, specialization, reviewCount } = doctor
+
+    const imageSource = useMemo(() => {
+        if (!image) return { uri: DEFAULT_AVATAR }
+        return { uri: image }
+    }, [image])
 
     return (
         <View style={styles.heroSection}>
             <View style={styles.avatarContainer}>
                 <Image source={imageSource} style={styles.doctorAvatar} resizeMode="cover" />
-                {isVerified && (
+                {verified && (
                     <View style={styles.badgeWrapper}>
                         <VerifiedIcon width={getHeight(24)} height={getHeight(24)} />
                     </View>
                 )}
             </View>
 
-            {Boolean(doctorName) && <TextView text={doctorName} style={styles.doctorName} />}
-            {Boolean(specialtyText) && <TextView text={specialtyText} style={styles.specialtyText} />}
+            {name && <TextView text={name} style={styles.doctorName} />}
+            {specialization && <TextView text={specialization} style={styles.specialtyText} />}
 
-            {/* Stats Badges */}
             <View style={styles.badgesRow}>
-                {ratingVal != null && (
+                {rating != null && (
                     <View style={styles.badgePill}>
                         <StarIcon width={getHeight(13)} height={getHeight(13)} fill={colors.darkGreen} color={colors.darkGreen} />
-                        <TextView text={` ${ratingVal}`} style={styles.badgeBoldText} />
-                        {reviewsCountText != null && (
-                            <TextView text={` (${reviewsCountText} ${detailsText.reviews})`} style={styles.badgeSubText} />
+                        <TextView text={` ${rating.toString()}`} style={styles.badgeBoldText} />
+                        {reviewCount != null && (
+                            <TextView text={` (${reviewCount.toString()} ${detailsText.reviews})`} style={styles.badgeSubText} />
                         )}
                     </View>
                 )}
 
-                {experienceYears != null && (
+                {experience != null && (
                     <View style={styles.badgePill}>
                         <ClockIcon width={getHeight(13)} height={getHeight(13)} />
-                        <TextView text={` ${experienceYears} ${detailsText.yrs}`} style={styles.badgeBoldText} />
+                        <TextView text={` ${experience} ${detailsText.yrs}`} style={styles.badgeBoldText} />
                         <TextView text={` ${detailsText.exp}`} style={styles.badgeSubText} />
                     </View>
                 )}

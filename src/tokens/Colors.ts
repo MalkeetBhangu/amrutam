@@ -37,6 +37,8 @@ const colors = {
     disabledPillBg: 'rgba(247, 246, 244, 1)',
     disabledPillBorder: 'rgba(239, 239, 239, 1)',
     disabledPillText: 'rgba(176, 181, 187, 1)',
+    bookingIconBg: 'rgba(235, 245, 240, 1)',
+    cancelRed: 'rgba(211, 47, 47, 1)',
 }
 
 export default colors

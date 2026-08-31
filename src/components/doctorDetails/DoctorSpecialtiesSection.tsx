@@ -5,26 +5,25 @@ import TextView from 'src/components/sharedComponents/TextView'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
 import { getTexts } from 'src/translations/TranslationHelper'
+import { useUserState } from '@src/store/UseUserStore'
 
 export interface DoctorSpecialtiesSectionProps {
-    specialtiesList: string[]
+    specialties: string
 }
 
-const DoctorSpecialtiesSection: React.FC<DoctorSpecialtiesSectionProps> = ({ specialtiesList }) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
+const DoctorSpecialtiesSection: React.FC<DoctorSpecialtiesSectionProps> = ({ specialties }) => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
     const detailsText = t.doctors.details
 
-    if (!specialtiesList || specialtiesList.length === 0) return null
 
     return (
         <View style={styles.sectionContainer}>
             <TextView text={detailsText.specialtiesAndExpertise} style={styles.sectionTitle} />
             <View style={styles.chipsContainer}>
-                {specialtiesList.map((item, index) => (
-                    <View key={index} style={styles.chipPill}>
-                        <TextView text={item} style={styles.chipText} />
-                    </View>
-                ))}
+                <View style={styles.chipPill}>
+                    <TextView text={specialties} style={styles.chipText} />
+                </View>
             </View>
         </View>
     )

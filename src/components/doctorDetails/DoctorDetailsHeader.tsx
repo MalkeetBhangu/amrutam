@@ -1,33 +1,27 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { StyleSheet, View, Image, Pressable } from 'react-native'
-import {
-    logo,
-    backArrow as BackArrowIcon,
-    heartIcon as HeartIcon,
-} from 'assets'
+import { logo, backArrow as BackArrowIcon, heartIcon as HeartIcon, } from 'assets'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
 import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
 import { getTexts } from 'src/translations/TranslationHelper'
+import { useUserState } from '@src/store/UseUserStore'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { ParamsList } from '@src/navigation/useNavigation'
 
-export interface DoctorDetailsHeaderProps {
-    onBackPress: () => void
-    isFavorite: boolean
-    onFavoriteToggle: () => void
-}
 
-const DoctorDetailsHeader: React.FC<DoctorDetailsHeaderProps> = ({
-    onBackPress,
-    isFavorite,
-    onFavoriteToggle,
-}) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
+const DoctorDetailsHeader = () => {
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
     const detailsText = t.doctors.details
+    const [isFavorite, setIsFavorite] = useState<boolean>(false)
+    const navigation = useNavigation<StackNavigationProp<ParamsList>>()
+    const handleBackPress = useCallback(() => navigation.goBack(), [navigation])
 
     return (
         <View>
-            {/* Top App Header */}
             <View style={styles.topHeader}>
                 <View style={styles.logoWrapper}>
                     <Image source={logo} style={styles.logoImage} resizeMode="contain" />
@@ -38,21 +32,13 @@ const DoctorDetailsHeader: React.FC<DoctorDetailsHeaderProps> = ({
                 </Pressable>
             </View>
 
-            {/* Doctor Navigation Bar */}
             <View style={styles.navHeader}>
-                <Pressable style={styles.iconCircleButton} onPress={onBackPress}>
+                <Pressable style={styles.iconCircleButton} onPress={handleBackPress}>
                     <BackArrowIcon width={getHeight(18)} height={getHeight(18)} />
                 </Pressable>
-
                 <TextView text={detailsText.doctorProfile} style={styles.screenTitleText} />
-
-                <Pressable style={styles.iconCircleButton} onPress={onFavoriteToggle}>
-                    <HeartIcon
-                        width={getHeight(18)}
-                        height={getHeight(18)}
-                        stroke={isFavorite ? colors.heartActiveRed : colors.textDark}
-                        fill={isFavorite ? colors.heartActiveRed : 'none'}
-                    />
+                <Pressable style={styles.iconCircleButton} onPress={() => setIsFavorite(prev => !prev)}>
+                    <HeartIcon width={getHeight(18)} height={getHeight(18)} stroke={isFavorite ? colors.heartActiveRed : colors.textDark} fill={isFavorite ? colors.heartActiveRed : 'none'} />
                 </Pressable>
             </View>
         </View>

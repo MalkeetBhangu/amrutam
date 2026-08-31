@@ -4,6 +4,7 @@ import { QUERY_KEYS } from "./ApiConstants"
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL
 
 export interface CancelBookingPayload {
+    userId: string
     doctorId: string
     slotId: string
     date?: string

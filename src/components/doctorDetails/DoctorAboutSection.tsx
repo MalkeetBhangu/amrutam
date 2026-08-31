@@ -6,12 +6,15 @@ import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getHeight } from 'src/libs/StyleHelper'
 import { getTexts } from 'src/translations/TranslationHelper'
 
+import { useUserState } from '@src/store/UseUserStore'
+
 export interface DoctorAboutSectionProps {
     aboutText?: string
 }
 
 const DoctorAboutSection: React.FC<DoctorAboutSectionProps> = ({ aboutText }) => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
     const detailsText = t.doctors.details
 
     if (!aboutText) return null

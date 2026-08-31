@@ -10,6 +10,7 @@ const getSlots = async ({ queryKey }: any): Promise<GetDoctorSlotsRangeResponse>
 
     const response = await fetch(url)
     const data = await response.json()
+    console.log("khskdhfkjhsdkf", JSON.stringify(data))
 
     return data
 }
