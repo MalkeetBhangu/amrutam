@@ -1,12 +1,13 @@
 import React, { useState, useCallback } from 'react'
-import { View, StyleSheet, Image, Pressable } from 'react-native'
-import { logo, search as SearchIcon, filter as FilterIcon } from 'assets'
+import { View, StyleSheet } from 'react-native'
+import { search as SearchIcon, filter as FilterIcon } from 'assets'
 import { getHeight } from 'src/libs/StyleHelper'
 import colors from 'src/tokens/Colors'
 import { getTexts } from 'src/translations/TranslationHelper'
-import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import TextInput from '@src/components/sharedComponents/TextInput'
 import TextView from '@src/components/sharedComponents/TextView'
+import HeaderRow from '@src/components/sharedComponents/HeaderRow'
 
 import UpcomingConsultationCard from './UpcomingConsultationCard'
 import { useUserState } from '@src/store/UseUserStore'
@@ -33,15 +34,7 @@ const DoctorHeader: React.FC<DoctorHeaderProps> = ({ onFilterPress, searchQuery:
 
     return (
         <View style={styles.headerContainer}>
-            <View style={styles.topRow}>
-                <View style={styles.logoWrapper}>
-                    <Image source={logo} style={styles.logoImage} resizeMode="contain" />
-                    <TextView style={styles.logoText} text={t.doctors.logoText.toUpperCase()} />
-                </View>
-                <Pressable onPress={() => { }} style={styles.avatarWrapper}>
-                    <Image source={{ uri: DEFAULT_AVATAR }} style={styles.avatarImage} resizeMode="cover" />
-                </Pressable>
-            </View>
+            <HeaderRow title={t.doctors.logoText.toUpperCase()} style={styles.headerRowStyle} />
 
             {upcomingBooking && <UpcomingConsultationCard booking={upcomingBooking} />}
 
@@ -74,36 +67,10 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: 16,
     },
-    topRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    logoWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    logoImage: {
-        height: getHeight(34),
-        width: getHeight(34),
-    },
-    logoText: {
-        fontSize: getHeight(18),
-        color: colors.darkGreen,
-        marginLeft: 8,
-        letterSpacing: 1.2,
-    },
-    avatarWrapper: {
-        width: getHeight(40),
-        height: getHeight(40),
-        borderRadius: getHeight(20),
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: colors.avatarBorder,
-    },
-    avatarImage: {
-        width: '100%',
-        height: '100%',
+    headerRowStyle: {
+        paddingHorizontal: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
     },
     titleSection: {
         marginTop: 20,

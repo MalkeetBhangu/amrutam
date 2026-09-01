@@ -1,10 +1,11 @@
 import React, { useCallback } from 'react'
-import { StyleSheet, View, Image, Pressable, Alert } from 'react-native'
+import { StyleSheet, View, Pressable, Alert } from 'react-native'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
+import HeaderRow from 'src/components/sharedComponents/HeaderRow'
 import { getHeight } from 'src/libs/StyleHelper'
-import { logo, comingSoon as ComingSoonIcon, notificationIcon as NotificationIcon } from 'assets'
-import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { comingSoon as ComingSoonIcon, notificationIcon as NotificationIcon } from 'assets'
+import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { useUserState } from '@src/store/UseUserStore'
 import { getTexts } from 'src/translations/TranslationHelper'
 
@@ -19,15 +20,7 @@ const Records: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.headerRow}>
-                <View style={styles.logoRow}>
-                    <Image source={logo} style={styles.logoImage} resizeMode="contain" />
-                    <TextView text={recordsTexts?.logoText?.toUpperCase() || ''} style={styles.logoText} />
-                </View>
-                <View style={styles.avatarWrapper}>
-                    <Image source={{ uri: DEFAULT_AVATAR }} style={styles.avatarImage} />
-                </View>
-            </View>
+            <HeaderRow title={recordsTexts?.logoText?.toUpperCase()} />
 
             <View style={styles.contentContainer}>
                 <View style={styles.iconCircle}>
@@ -50,41 +43,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.screenBackground,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingTop: 12,
-        paddingBottom: 16,
-    },
-    logoRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    logoImage: {
-        width: getHeight(28),
-        height: getHeight(28),
-        marginRight: 8,
-    },
-    logoText: {
-        fontSize: getHeight(18),
-        fontWeight: '700',
-        color: colors.darkGreen,
-        letterSpacing: 0.8,
-    },
-    avatarWrapper: {
-        width: getHeight(38),
-        height: getHeight(38),
-        borderRadius: getHeight(19),
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: colors.avatarBorder,
-    },
-    avatarImage: {
-        width: '100%',
-        height: '100%',
     },
     contentContainer: {
         flex: 1,

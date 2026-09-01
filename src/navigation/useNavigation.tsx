@@ -8,6 +8,8 @@ const { HOME, DOCTOR_DETAILS, DOCTORS, CART, PRODUCT_DETAIL } = Screens
 
 export type ParamsList = {
     [TABS.SHOP_TAB]: undefined
+    [TABS.DOCTORS_TAB]: undefined
+    [TABS.WISHLIST_TAB]: undefined
     [HOME]: | undefined
     [DOCTOR_DETAILS]: { doctor: Doctor }
     [DOCTORS]: undefined

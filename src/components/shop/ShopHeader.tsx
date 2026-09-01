@@ -1,10 +1,11 @@
 import React from 'react'
-import { StyleSheet, View, Image, TextInput, Pressable } from 'react-native'
-import { logo, search as SearchIcon, filter as FilterIcon } from 'assets'
+import { StyleSheet, View, TextInput, Pressable } from 'react-native'
+import { search as SearchIcon, filter as FilterIcon } from 'assets'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
+import HeaderRow from 'src/components/sharedComponents/HeaderRow'
 import { getHeight } from 'src/libs/StyleHelper'
-import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { getTexts } from 'src/translations/TranslationHelper'
 import { useUserState } from '@src/store/UseUserStore'
 
@@ -21,18 +22,7 @@ const ShopHeader: React.FC<ShopHeaderProps> = ({ searchQuery, onChangeSearchQuer
 
     return (
         <View style={styles.container}>
-            <View style={styles.topBar}>
-                <View style={styles.logoRow}>
-                    <Image source={logo} style={styles.logoImage} resizeMode="contain" />
-                    <TextView text={shopTexts?.logoText?.toUpperCase()} style={styles.brandTitle} />
-                </View>
-                <View style={styles.rightHeaderRow}>
-                    <TextView text={shopTexts?.pageTitle} style={styles.pageTitle} />
-                    <View style={styles.avatarWrapper}>
-                        <Image source={{ uri: DEFAULT_AVATAR }} style={styles.avatarImage} />
-                    </View>
-                </View>
-            </View>
+            <HeaderRow title={shopTexts?.logoText?.toUpperCase()} rightText={shopTexts?.pageTitle} style={styles.headerRowStyle} />
             <TextView text={shopTexts?.mainTitle} style={styles.mainTitle} />
 
             <View style={styles.searchRow}>
@@ -61,48 +51,10 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: 8,
     },
-    topBar: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 16,
-    },
-    logoRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    logoImage: {
-        width: getHeight(28),
-        height: getHeight(28),
-        marginRight: 8,
-    },
-    brandTitle: {
-        fontSize: getHeight(16),
-        fontWeight: '800',
-        color: colors.darkGreen,
-        letterSpacing: 1.1,
-    },
-    rightHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    pageTitle: {
-        fontSize: getHeight(15),
-        fontWeight: '600',
-        color: colors.textDark,
-        marginRight: 10,
-    },
-    avatarWrapper: {
-        width: getHeight(36),
-        height: getHeight(36),
-        borderRadius: getHeight(18),
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: colors.avatarBorder,
-    },
-    avatarImage: {
-        width: '100%',
-        height: '100%',
+    headerRowStyle: {
+        paddingHorizontal: 0,
+        paddingTop: 0,
+        paddingBottom: 16,
     },
     mainTitle: {
         fontSize: getHeight(24),
