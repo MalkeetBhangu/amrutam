@@ -1,12 +1,14 @@
 import { useGetDoctors } from '@src/apis/useGetDoctors'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import colors from 'src/tokens/Colors'
 import DoctorCard from './DoctorCard'
 import DoctorCardSkeleton from './DoctorCardSkeleton'
-import DoctorFilterModal, { FilterState, DoctorFilterModalRef } from './DoctorFilterModal'
+import type { FilterState, DoctorFilterModalRef } from './DoctorFilterModal'
 import DoctorHeader from './DoctorHeader'
 import NoDoctorsFound from './NoDoctorsFound'
+
+const DoctorFilterModal = lazy(() => import('./DoctorFilterModal'))
 
 const Doctors = () => {
     const filterModalRef = useRef<DoctorFilterModalRef>(null)
@@ -80,7 +82,9 @@ const Doctors = () => {
                 showsVerticalScrollIndicator={false}
             />
 
-            <DoctorFilterModal ref={filterModalRef} activeFilters={activeFilters} onApplyFilters={setActiveFilters} />
+            <Suspense fallback={null}>
+                <DoctorFilterModal ref={filterModalRef} activeFilters={activeFilters} onApplyFilters={setActiveFilters} />
+            </Suspense>
         </View>
     )
 }

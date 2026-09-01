@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react'
 import { StyleSheet, View, FlatList, ActivityIndicator } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import colors from 'src/tokens/Colors'
@@ -19,9 +19,11 @@ import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { useUserState } from '@src/store/UseUserStore'
 import { getTexts } from 'src/translations/TranslationHelper'
 import ProductCardSkeleton from './ProductCardSkeleton'
-import ProductFilterModal, { FilterState, ProductFilterModalRef } from './ProductFilterModal'
+import type { FilterState, ProductFilterModalRef } from './ProductFilterModal'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ParamsList } from '@src/navigation/useNavigation'
+
+const ProductFilterModal = lazy(() => import('./ProductFilterModal'))
 
 const SKELETON_ARRAY = [1, 2, 3, 4, 5, 6]
 
@@ -130,7 +132,9 @@ const Shop: React.FC = () => {
             />
 
             <ShopCartFloatingButton count={cartCount} onPress={handleCartPress} />
-            <ProductFilterModal ref={filterModalRef} activeFilters={activeFilters} onApplyFilters={setActiveFilters} />
+            <Suspense fallback={null}>
+                <ProductFilterModal ref={filterModalRef} activeFilters={activeFilters} onApplyFilters={setActiveFilters} />
+            </Suspense>
         </View>
     )
 }

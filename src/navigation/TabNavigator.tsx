@@ -1,12 +1,9 @@
-import React from 'react'
-import { StyleSheet, View, StatusBar } from 'react-native'
+import React, { lazy, Suspense } from 'react'
+import { StyleSheet, View, StatusBar, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { doctors, home, profile, records, shop } from '@assets/index'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import Bookings from '@src/components/bookings/Bookings'
-import Cart from '@src/components/cart'
-import DoctorDetails from '@src/components/doctorDetails'
 import Doctors from '@src/components/doctors'
 import Home from '@src/components/home'
 import Wishlist from '@src/components/wishlist'
@@ -17,16 +14,40 @@ import colors from '@src/tokens/Colors'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { Screens, TABS } from 'src/constants/Screens'
 import { getTexts } from 'src/translations/TranslationHelper'
-import ProductDetail from '@src/components/productDetail'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
 
+const Cart = lazy(() => import('@src/components/cart'))
+const DoctorDetails = lazy(() => import('@src/components/doctorDetails'))
+const Bookings = lazy(() => import('@src/components/bookings/Bookings'))
+const ProductDetail = lazy(() => import('@src/components/productDetail'))
+
 const withTopSafeArea = (Component: React.ComponentType<any>) => (props: any) => (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.screenBackground }} edges={['top']}>
         <StatusBar barStyle="dark-content" backgroundColor={colors.screenBackground} />
-        <Component {...props} />
+        <Suspense
+            fallback={
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={colors.darkGreen} />
+                </View>
+            }
+        >
+            <Component {...props} />
+        </Suspense>
     </SafeAreaView>
+)
+
+const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
+    <Suspense
+        fallback={
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={colors.darkGreen} />
+            </View>
+        }
+    >
+        <Component {...props} />
+    </Suspense>
 )
 
 export const HomeNavigator = () => {
@@ -53,7 +74,7 @@ const ShopNavigator = () => {
         <Stack.Navigator initialRouteName={Screens.SHOP} screenOptions={{ headerShown: false }}>
             <Stack.Screen name={Screens.SHOP} component={withTopSafeArea(Shop)} />
             <Stack.Screen name={Screens.CART} component={withTopSafeArea(Cart)} />
-            <Stack.Screen name={Screens.PRODUCT_DETAIL} component={ProductDetail} />
+            <Stack.Screen name={Screens.PRODUCT_DETAIL} component={withSuspense(ProductDetail)} />
         </Stack.Navigator>
     )
 }
@@ -139,6 +160,12 @@ const styles = StyleSheet.create({
     iconWrapper: {
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.screenBackground,
     },
 })
 
