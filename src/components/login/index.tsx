@@ -18,10 +18,10 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 const Login: React.FC = () => {
     const navigation = useNavigation<any>()
     const insets = useSafeAreaInsets()
-    const { userData, setUserData } = useUserState()
+    const { userData, userData: { languageCode = DEFAULT_LANGUAGE_CODE }, setUserData } = useUserState(['languageCode', 'userId'])
     const { mutate: createUserMutate, isPending } = useCreateUser()
-    const textData = getTexts(userData.languageCode ?? DEFAULT_LANGUAGE_CODE)
-    const loginTexts = textData.login
+    const t = getTexts(languageCode)
+    const loginTexts = t.login
 
     const handleCreateAccount = useCallback(() => {
         if (!userData?.userId) {

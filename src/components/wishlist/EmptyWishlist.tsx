@@ -14,8 +14,8 @@ export interface EmptyWishlistProps {
 
 const EmptyWishlist: React.FC<EmptyWishlistProps> = ({ onExploreShopPress }) => {
     const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
-    const textData = getTexts(languageCode)
-    const wishlistTexts = textData.wishlist
+    const t = getTexts(languageCode)
+    const wishlistTexts = t.wishlist
 
     return (
         <View style={styles.container}>

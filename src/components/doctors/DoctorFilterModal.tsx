@@ -30,9 +30,9 @@ export interface DoctorFilterModalProps {
 
 const DoctorFilterModal = forwardRef<DoctorFilterModalRef, DoctorFilterModalProps>(
     ({ activeFilters, onApplyFilters }, ref) => {
-        const { userData: { languageCode } } = useUserState(['languageCode'])
+        const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
         const [visible, setVisible] = useState(false)
-        const t = getTexts(languageCode ?? DEFAULT_LANGUAGE_CODE)
+        const t = getTexts(languageCode)
         const filterTranslations = t.doctors?.filterModal || {}
         const { data: filterListingData } = useGetFilterListing('doctors')
         const [selectedExpertise, setSelectedExpertise] = useState<string[]>(activeFilters?.expertise || [])

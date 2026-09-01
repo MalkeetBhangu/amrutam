@@ -11,6 +11,7 @@ import Records from '@src/components/records'
 import Shop from '@src/components/shop'
 import { getHeight } from '@src/libs/StyleHelper'
 import colors from '@src/tokens/Colors'
+import { useUserState } from '@src/store/UseUserStore'
 import { DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
 import { Screens, TABS } from 'src/constants/Screens'
 import { getTexts } from 'src/translations/TranslationHelper'
@@ -23,9 +24,25 @@ const DoctorDetails = lazy(() => import('@src/components/doctorDetails'))
 const Bookings = lazy(() => import('@src/components/bookings/Bookings'))
 const ProductDetail = lazy(() => import('@src/components/productDetail'))
 
-const withTopSafeArea = (Component: React.ComponentType<any>) => (props: any) => (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.screenBackground }} edges={['top']}>
-        <StatusBar barStyle="dark-content" backgroundColor={colors.screenBackground} />
+const withTopSafeArea = (Component: React.ComponentType<any>) => {
+    return (props: any) => (
+        <SafeAreaView style={styles.safeAreaTop} edges={['top']}>
+            <StatusBar barStyle="dark-content" backgroundColor={colors.screenBackground} />
+            <Suspense
+                fallback={
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={colors.darkGreen} />
+                    </View>
+                }
+            >
+                <Component {...props} />
+            </Suspense>
+        </SafeAreaView>
+    )
+}
+
+const withSuspense = (Component: React.ComponentType<any>) => {
+    return (props: any) => (
         <Suspense
             fallback={
                 <View style={styles.loadingContainer}>
@@ -35,20 +52,8 @@ const withTopSafeArea = (Component: React.ComponentType<any>) => (props: any) =>
         >
             <Component {...props} />
         </Suspense>
-    </SafeAreaView>
-)
-
-const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
-    <Suspense
-        fallback={
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.darkGreen} />
-            </View>
-        }
-    >
-        <Component {...props} />
-    </Suspense>
-)
+    )
+}
 
 export const HomeNavigator = () => {
     return (
@@ -63,7 +68,7 @@ const DoctorsNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.DOCTORS} screenOptions={{ headerShown: false }}>
             <Stack.Screen name={Screens.DOCTORS} component={withTopSafeArea(Doctors)} />
-            <Stack.Screen name={Screens.DOCTOR_DETAILS} component={withTopSafeArea(DoctorDetails)} />
+            <Stack.Screen name={Screens.DOCTOR_DETAILS} component={withSuspense(DoctorDetails)} />
             <Stack.Screen name={Screens.BOOKINGS} component={withTopSafeArea(Bookings)} />
         </Stack.Navigator>
     )
@@ -74,7 +79,7 @@ const ShopNavigator = () => {
         <Stack.Navigator initialRouteName={Screens.SHOP} screenOptions={{ headerShown: false }}>
             <Stack.Screen name={Screens.SHOP} component={withTopSafeArea(Shop)} />
             <Stack.Screen name={Screens.CART} component={withTopSafeArea(Cart)} />
-            <Stack.Screen name={Screens.PRODUCT_DETAIL} component={withSuspense(ProductDetail)} />
+            <Stack.Screen name={Screens.PRODUCT_DETAIL} component={withTopSafeArea(ProductDetail)} />
         </Stack.Navigator>
     )
 }
@@ -97,7 +102,8 @@ const WishListNavigator = () => {
 }
 
 const TabNavigator = () => {
-    const t = getTexts(DEFAULT_LANGUAGE_CODE)
+    const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
+    const t = getTexts(languageCode)
 
     const TabNames = [
         { tabIcon: home, name: TABS.HOME_TAB, screen: HomeNavigator, label: t.tabs.home },
@@ -145,6 +151,10 @@ const TabNavigator = () => {
 }
 
 const styles = StyleSheet.create({
+    safeAreaTop: {
+        flex: 1,
+        backgroundColor: colors.screenBackground,
+    },
     tabBar: {
         borderTopWidth: getHeight(1),
         borderTopColor: colors.shadowColor,

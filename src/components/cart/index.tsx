@@ -25,8 +25,8 @@ const CartScreen: React.FC = () => {
     const { mutate: removeFromCartMutate } = useRemoveFromCart()
     const { mutate: updateCartQtyMutate } = useUpdateCartQuantity()
     const { mutate: clearCartMutate } = useClearCart()
-    const textData = getTexts(languageCode)
-    const cartTexts = textData.cart
+    const t = getTexts(languageCode)
+    const cartTexts = t.cart
 
     const cartItems: CartItem[] = useMemo(() => {
         const raw: any = cartData

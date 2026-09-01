@@ -14,8 +14,8 @@ export interface EmptyCartProps {
 
 const EmptyCart: React.FC<EmptyCartProps> = ({ onShopNowPress }) => {
     const { userData: { languageCode = DEFAULT_LANGUAGE_CODE } } = useUserState(['languageCode'])
-    const textData = getTexts(languageCode)
-    const cartTexts = textData.cart
+    const t = getTexts(languageCode)
+    const cartTexts = t.cart
 
     return (
         <View style={styles.container}>
