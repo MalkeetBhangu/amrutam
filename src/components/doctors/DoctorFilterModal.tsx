@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react'
 import { StyleSheet, View, Modal, Pressable, ScrollView } from 'react-native'
 import { cross as CrossIcon } from 'assets'
 import colors from 'src/tokens/Colors'
@@ -54,27 +54,27 @@ const DoctorFilterModal = forwardRef<DoctorFilterModalRef, DoctorFilterModalProp
             }
         }, [visible, activeFilters])
 
-        const toggleExpertise = (item: string) => setSelectedExpertise((prev) => prev.includes(item) ? prev.filter((e) => e !== item) : [...prev, item])
+        const toggleExpertise = useCallback((item: string) => setSelectedExpertise((prev) => prev.includes(item) ? prev.filter((e) => e !== item) : [...prev, item]), [])
 
-        const toggleLanguage = (item: string) => setSelectedLanguages((prev) => prev.includes(item) ? prev.filter((l) => l !== item) : [...prev, item])
+        const toggleLanguage = useCallback((item: string) => setSelectedLanguages((prev) => prev.includes(item) ? prev.filter((l) => l !== item) : [...prev, item]), [])
 
-        const handleClose = () => setVisible(false)
+        const handleClose = useCallback(() => setVisible(false), [])
 
-        const handleClearAll = () => {
+        const handleClearAll = useCallback(() => {
             setSelectedExpertise([])
             setSelectedLanguages([])
             setSelectedGender('')
             setMaxFee(2000)
             onApplyFilters(undefined)
             setVisible(false)
-        }
+        }, [onApplyFilters])
 
-        const handleApply = () => {
+        const handleApply = useCallback(() => {
             const isEmpty = selectedExpertise.length === 0 && selectedLanguages.length === 0 && !selectedGender && maxFee >= 2000
             if (isEmpty) onApplyFilters(undefined)
             else onApplyFilters({ expertise: selectedExpertise, languages: selectedLanguages, gender: selectedGender, maxFee })
             setVisible(false)
-        }
+        }, [selectedExpertise, selectedLanguages, selectedGender, maxFee, onApplyFilters])
 
         return (
             <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
@@ -253,4 +253,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default DoctorFilterModal
+export default React.memo(DoctorFilterModal)

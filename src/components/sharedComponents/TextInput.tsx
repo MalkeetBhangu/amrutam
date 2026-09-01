@@ -47,7 +47,7 @@ const TextInput: React.FC<TextInputProps> = ({
     ...restProps
 }) => {
     const [isSecure, setIsSecure] = useState<boolean>(isPassword ? true : !!secureTextEntry)
-    const toggleSecure = () => setIsSecure(!isSecure)
+    const toggleSecure = React.useCallback(() => setIsSecure((prev) => !prev), [])
 
     const renderLeftIcon = () => {
         if (leftIcon) {
@@ -163,4 +163,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default TextInput
+export default React.memo(TextInput)

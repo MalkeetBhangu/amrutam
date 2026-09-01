@@ -375,4 +375,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default Bookings
+export default React.memo(Bookings)

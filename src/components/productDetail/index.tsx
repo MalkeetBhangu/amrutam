@@ -73,7 +73,7 @@ const ProductDetail: React.FC = () => {
         if (nextState) addToWishlistMutate({ userId: userId, productId: product.id })
         else removeFromWishlistMutate({ userId: userId, productId: product.id })
 
-    }, [isWishlisted, addToWishlistMutate, removeFromWishlistMutate, product.id])
+    }, [isWishlisted, addToWishlistMutate, removeFromWishlistMutate, product.id, userId])
 
     const handleIncrement = useCallback(() => { setQuantity((prev) => Math.min(prev + 1, product.stock || 20)) }, [product.stock])
     const handleDecrement = useCallback(() => { setQuantity((prev) => Math.max(prev - 1, 1)) }, [])
@@ -81,12 +81,12 @@ const ProductDetail: React.FC = () => {
     const handleAddToCart = useCallback(() => {
         addToCartMutate({ userId: userId, productId: product.id, quantity, })
         Alert.alert(detailTexts.addedToCart ? '' : 'Success', detailTexts.addedToCart || '')
-    }, [addToCartMutate, product.id, quantity, detailTexts.addedToCart])
+    }, [addToCartMutate, product.id, quantity, detailTexts.addedToCart, userId])
 
     const handleBuyNow = useCallback(() => {
         addToCartMutate({ userId: userId, productId: product.id, quantity, })
         navigation.navigate(Screens.CART)
-    }, [addToCartMutate, product.id, quantity, navigation])
+    }, [addToCartMutate, product.id, quantity, navigation, userId])
 
     const currentPrice = Number(product.price || product.discountPrice || 599)
     const originalPrice = Math.round(currentPrice * 1.33)
@@ -453,4 +453,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default ProductDetail
+export default React.memo(ProductDetail)

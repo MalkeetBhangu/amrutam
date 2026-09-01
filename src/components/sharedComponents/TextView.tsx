@@ -25,4 +25,4 @@ const TextView: React.FunctionComponent<TextViewProps> = (props) => {
     )
 }
 
-export default TextView
+export default React.memo(TextView)

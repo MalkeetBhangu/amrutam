@@ -65,4 +65,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default NoDoctorsFound
+export default React.memo(NoDoctorsFound)

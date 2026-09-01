@@ -127,4 +127,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default DoctorCardSkeleton
+export default React.memo(DoctorCardSkeleton)

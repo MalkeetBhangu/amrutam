@@ -116,4 +116,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default ProductCardSkeleton
+export default React.memo(ProductCardSkeleton)

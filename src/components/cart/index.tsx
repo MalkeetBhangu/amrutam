@@ -50,7 +50,7 @@ const CartScreen: React.FC = () => {
                 updateCartQtyMutate({ userId: userId, productId: targetProdId, quantity: newQty })
             }
         },
-        [cartItems, updateCartQtyMutate]
+        [cartItems, updateCartQtyMutate, userId]
     )
 
     const handleDecreaseQty = useCallback(
@@ -66,7 +66,7 @@ const CartScreen: React.FC = () => {
                 }
             }
         },
-        [cartItems, updateCartQtyMutate, removeFromCartMutate]
+        [cartItems, updateCartQtyMutate, removeFromCartMutate, userId]
     )
 
     const handleDeleteItem = useCallback(
@@ -394,4 +394,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default CartScreen
+export default React.memo(CartScreen)

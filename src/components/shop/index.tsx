@@ -98,7 +98,7 @@ const Shop: React.FC = () => {
         <View style={styles.emptyContainer}>
             <TextView text={t.shop?.noProductsFound} style={styles.emptyText} />
         </View>
-    ), [])
+    ), [t.shop?.noProductsFound])
 
     const renderFooter = useCallback(() => {
         if (isFetchingNextPage) {
@@ -123,7 +123,7 @@ const Shop: React.FC = () => {
                 columnWrapperStyle={styles.columnWrapper}
                 contentContainerStyle={styles.listContent}
                 ListEmptyComponent={showSkeleton ? null : renderEmpty}
-                ListFooterComponent={showSkeleton || products.length === 0 ? null : renderFooter}
+                ListFooterComponent={renderFooter}
                 onEndReached={showSkeleton || products.length === 0 ? undefined : handleLoadMore}
                 onEndReachedThreshold={0.5}
                 showsVerticalScrollIndicator={false}
@@ -169,4 +169,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default Shop
+export default React.memo(Shop)

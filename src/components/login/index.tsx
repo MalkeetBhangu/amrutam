@@ -191,4 +191,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default Login
+export default React.memo(Login)

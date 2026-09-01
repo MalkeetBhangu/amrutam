@@ -1,16 +1,16 @@
-import React, { useCallback } from 'react'
-import { StyleSheet, View, Image, Pressable } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import colors from 'src/tokens/Colors'
-import TextView from 'src/components/sharedComponents/TextView'
-import { getHeight } from 'src/libs/StyleHelper'
-import { logo, medicalKit as MedicalKitIcon, bag as BagIcon, wishlistWhite as WishlistWhiteIcon, cartIcon as CartIcon } from 'assets'
-import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
-import { Screens, TABS } from 'src/constants/Screens'
-import { useUserState } from '@src/store/UseUserStore'
-import { getTexts } from 'src/translations/TranslationHelper'
 import { ParamsList } from '@src/navigation/useNavigation'
+import { useUserState } from '@src/store/UseUserStore'
+import { bag as BagIcon, logo, medicalKit as MedicalKitIcon, wishlistWhite as WishlistWhiteIcon } from 'assets'
+import React, { useCallback } from 'react'
+import { Image, Pressable, StyleSheet, View } from 'react-native'
+import TextView from 'src/components/sharedComponents/TextView'
+import { DEFAULT_AVATAR, DEFAULT_LANGUAGE_CODE } from 'src/constants/Constants'
+import { TABS } from 'src/constants/Screens'
+import { getHeight } from 'src/libs/StyleHelper'
+import colors from 'src/tokens/Colors'
+import { getTexts } from 'src/translations/TranslationHelper'
 
 const Home: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<ParamsList>>()
@@ -20,7 +20,6 @@ const Home: React.FC = () => {
     const handleDoctorPress = useCallback(() => { navigation.navigate(TABS.DOCTORS_TAB as any) }, [navigation])
     const handleShopPress = useCallback(() => { navigation.navigate(TABS.SHOP_TAB as any) }, [navigation])
     const handleWishlistPress = useCallback(() => { navigation.navigate(TABS.WISHLIST_TAB as any) }, [navigation])
-    const handleCartPress = useCallback(() => { navigation.navigate(Screens.CART) }, [navigation])
 
     return (
         <View style={styles.container}>
@@ -49,11 +48,6 @@ const Home: React.FC = () => {
                 <Pressable style={styles.actionButton} onPress={handleWishlistPress}>
                     <WishlistWhiteIcon width={getHeight(22)} height={getHeight(22)} />
                     <TextView text={homeTexts?.wishlist || ''} style={styles.buttonText} />
-                </Pressable>
-
-                <Pressable style={styles.actionButton} onPress={handleCartPress}>
-                    <CartIcon width={getHeight(22)} height={getHeight(22)} color={colors.white} stroke={colors.white} />
-                    <TextView text={homeTexts?.cart || ''} style={styles.buttonText} />
                 </Pressable>
             </View>
         </View>

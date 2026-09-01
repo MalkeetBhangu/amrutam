@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react'
+import React, { useState, useRef, useMemo, useCallback } from 'react'
 import { StyleSheet, View, PanResponder, LayoutChangeEvent, DimensionValue } from 'react-native'
 import colors from 'src/tokens/Colors'
 import TextView from 'src/components/sharedComponents/TextView'
@@ -21,14 +21,14 @@ const FeeRangeSlider: React.FC<FeeRangeSliderProps> = ({ minFee = 0, maxFee, onF
     const [trackWidth, setTrackWidth] = useState<number>(300)
     const trackRef = useRef<View>(null)
 
-    const handleTrackLayout = (e: LayoutChangeEvent) => {
+    const handleTrackLayout = useCallback((e: LayoutChangeEvent) => {
         const { width } = e.nativeEvent.layout
         if (width > 0) {
             setTrackWidth(width)
         }
-    }
+    }, [])
 
-    const updateFeeFromPageX = (pageX: number) => {
+    const updateFeeFromPageX = useCallback((pageX: number) => {
         if (!trackRef.current) return
         trackRef.current.measure((_, __, width, ___, pageXOffset) => {
             const currentWidth = width > 0 ? width : trackWidth
@@ -39,7 +39,7 @@ const FeeRangeSlider: React.FC<FeeRangeSliderProps> = ({ minFee = 0, maxFee, onF
                 onFeeChange(Math.max(100, newFee))
             }
         })
-    }
+    }, [trackWidth, maxLimit, onFeeChange])
 
     const panResponder = useMemo(
         () =>
@@ -53,7 +53,7 @@ const FeeRangeSlider: React.FC<FeeRangeSliderProps> = ({ minFee = 0, maxFee, onF
                     updateFeeFromPageX(evt.nativeEvent.pageX)
                 },
             }),
-        [trackWidth, maxLimit]
+        [updateFeeFromPageX]
     )
 
     const rightHandlePosition = `${Math.min(92, Math.max(0, (maxFee / maxLimit) * 92))}%`
@@ -161,4 +161,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default FeeRangeSlider
+export default React.memo(FeeRangeSlider)

@@ -1,5 +1,5 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { useGetDoctors } from '@src/apis/useGetDoctors'
-import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native'
 import colors from 'src/tokens/Colors'
 import DoctorCard from './DoctorCard'
@@ -105,4 +105,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default Doctors
+export default React.memo(Doctors)

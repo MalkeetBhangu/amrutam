@@ -162,4 +162,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default WishlistScreen
+export default React.memo(WishlistScreen)

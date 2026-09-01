@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { View, StyleSheet, Image, Pressable } from 'react-native'
 import { logo, search as SearchIcon, filter as FilterIcon } from 'assets'
 import { getHeight } from 'src/libs/StyleHelper'
@@ -23,13 +23,13 @@ const DoctorHeader: React.FC<DoctorHeaderProps> = ({ onFilterPress, searchQuery:
     const t = getTexts(languageCode)
     const [internalSearchQuery, setInternalSearchQuery] = useState('')
     const searchQuery = externalSearchQuery ?? internalSearchQuery
-    const handleSearchChange = (text: string) => {
+    const handleSearchChange = useCallback((text: string) => {
         if (onSearchChange) {
             onSearchChange(text)
         } else {
             setInternalSearchQuery(text)
         }
-    }
+    }, [onSearchChange])
 
     return (
         <View style={styles.headerContainer}>
@@ -135,4 +135,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default DoctorHeader
+export default React.memo(DoctorHeader)
