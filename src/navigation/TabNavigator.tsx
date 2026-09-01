@@ -41,19 +41,7 @@ const withTopSafeArea = (Component: React.ComponentType<any>) => {
     )
 }
 
-const withSuspense = (Component: React.ComponentType<any>) => {
-    return (props: any) => (
-        <Suspense
-            fallback={
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={colors.darkGreen} />
-                </View>
-            }
-        >
-            <Component {...props} />
-        </Suspense>
-    )
-}
+
 
 export const HomeNavigator = () => {
     return (
@@ -68,7 +56,7 @@ const DoctorsNavigator = () => {
     return (
         <Stack.Navigator initialRouteName={Screens.DOCTORS} screenOptions={{ headerShown: false }}>
             <Stack.Screen name={Screens.DOCTORS} component={withTopSafeArea(Doctors)} />
-            <Stack.Screen name={Screens.DOCTOR_DETAILS} component={withSuspense(DoctorDetails)} />
+            <Stack.Screen name={Screens.DOCTOR_DETAILS} component={withTopSafeArea(DoctorDetails)} />
             <Stack.Screen name={Screens.BOOKINGS} component={withTopSafeArea(Bookings)} />
         </Stack.Navigator>
     )
